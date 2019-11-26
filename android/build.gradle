@@ -38,7 +38,7 @@ android {
     compileSdkVersion 28
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 18
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     lintOptions {
@@ -47,5 +47,7 @@ android {
 }
 
 dependencies {
-    implementation files("$flutterRoot/bin/cache/artifacts/engine/android-x64/flutter.jar")
+    compile files('libs/gprintersdkv2.jar')
+    implementation files('libs/gprintersdkv2.jar')
+    //implementation files("$flutterRoot/bin/cache/artifacts/engine/android-x64/flutter.jar")
 }
