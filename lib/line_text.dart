@@ -3,6 +3,7 @@ class LineText {
   static const String TYPE_TEXT='text';
   static const String TYPE_BARCODE='barcode';
   static const String TYPE_QRCODE='qrcode';
+  static const String TYPE_IMAGE='image';
   static const String ALIGN_LEFT='left';
   static const String ALIGN_CENTER='center';
   static const String ALIGN_RIGHT='right';
@@ -18,7 +19,7 @@ class LineText {
   final int linefeed;
 
   LineText({
-    this.type, //text,barcode,qrcode
+    this.type, //text,barcode,qrcode,image(base64 string)
     this.content,
     this.size=0,
     this.align=ALIGN_LEFT,

@@ -2,6 +2,9 @@ package com.example.bluetooth_print;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import com.gprinter.command.EscCommand;
 import com.gprinter.command.FactoryCommand;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -171,4 +174,5 @@ public class BluetoothPrintPlugin implements MethodCallHandler {
 
     return result;
   }
+
 }

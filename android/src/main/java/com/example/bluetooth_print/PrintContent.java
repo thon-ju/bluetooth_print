@@ -1,5 +1,8 @@
 package com.example.bluetooth_print;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.util.Log;
 import com.gprinter.command.EscCommand;
 import com.gprinter.command.LabelCommand;
@@ -140,12 +143,20 @@ public class PrintContent {
                   esc.addSelectJustification(EscCommand.JUSTIFICATION.valueOf(align.toUpperCase()));
 
                   if("text".equals(type)){
+                        if(content == null || content.length() == 0) {
+                              continue;
+                        }
+
                         // 设置为倍高倍宽
                         esc.addSelectPrintModes(EscCommand.FONT.FONTA, emphasized, doubleheight, doublewidth, isUnderline);
                         esc.addText(content);
                         // 取消倍高倍宽
                         esc.addSelectPrintModes(EscCommand.FONT.FONTA, EscCommand.ENABLE.OFF, EscCommand.ENABLE.OFF, EscCommand.ENABLE.OFF, EscCommand.ENABLE.OFF);
                   }else if("barcode".equals(type)){
+                        if(content == null || content.length() == 0) {
+                              continue;
+                        }
+
                         esc.addSelectPrintingPositionForHRICharacters(EscCommand.HRI_POSITION.BELOW);
                         // 设置条码可识别字符位置在条码下方
                         // 设置条码高度为60点
@@ -155,6 +166,10 @@ public class PrintContent {
                         // 打印Code128码
                         esc.addCODE128(esc.genCodeB(content));
                   }else if("qrcode".equals(type)){
+                        if(content == null || content.length() == 0) {
+                              continue;
+                        }
+
                         // 设置纠错等级
                         esc.addSelectErrorCorrectionLevelForQRCode((byte) 0x31);
                         // 设置qrcode模块大小
@@ -163,6 +178,14 @@ public class PrintContent {
                         esc.addStoreQRCodeData(content);
                         // 打印QRCode
                         esc.addPrintQRCode();
+                  }else if("image".equals(type)){
+                        if(content == null || content.length() == 0) {
+                              continue;
+                        }
+
+                        byte[] bytes = Base64.decode(content, Base64.DEFAULT);
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                        esc.addRastBitImage(bitmap, 576, 0);
                   }
 
                   if(linefeed == 1){

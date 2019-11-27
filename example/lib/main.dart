@@ -1,4 +1,7 @@
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -6,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:bluetooth_print/bluetooth_print.dart';
 import 'package:bluetooth_print/bluetooth_device.dart';
 import 'package:bluetooth_print/line_text.dart';
+import 'package:path_provider/path_provider.dart';
 
 void main() => runApp(MyApp());
 
@@ -93,6 +97,12 @@ class _MyAppState extends State<MyApp> {
                   list.add(LineText(type: LineText.TYPE_TEXT, content: '在右边', align: LineText.ALIGN_RIGHT,linefeed: 0));
                   list.add(LineText(linefeed: 1));
                   list.add(LineText(type: LineText.TYPE_QRCODE, content: '我是一个测试i\n', size:10, align: LineText.ALIGN_CENTER, linefeed: 1));
+                  list.add(LineText(linefeed: 1));
+
+                  ByteData data = await rootBundle.load("assets/images/guide3.png");
+                  List<int> imageBytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+                  String base64Image = base64Encode(imageBytes);
+                  list.add(LineText(type: LineText.TYPE_IMAGE, content: base64Image, align: LineText.ALIGN_CENTER, linefeed: 1));
                   await BluetoothPrint.print(list);
                 },
               ),
