@@ -3,9 +3,10 @@
 - [x] connect    
 - [x] disconnect     
 - [x] print test message  
-- [ ] print text    
-- [ ] print image          
-- [ ] print qrcode       
+- [x] print text    
+- [x] print image          
+- [x] print qrcode 
+- [ ] display connect status         
 
 ## ios       
 - [ ] get devices    
@@ -14,4 +15,5 @@
 - [ ] print test message  
 - [ ] print text    
 - [ ] print image          
-- [ ] print qrcode   
+- [ ] print qrcode  
+- [ ] display connect status  
