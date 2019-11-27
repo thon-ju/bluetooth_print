@@ -1,9 +1,11 @@
-import 'package:bluetooth_print/bluetooth_device.dart';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:bluetooth_print/bluetooth_print.dart';
+import 'package:bluetooth_print/bluetooth_device.dart';
+import 'package:bluetooth_print/line_text.dart';
 
 void main() => runApp(MyApp());
 
@@ -86,7 +88,12 @@ class _MyAppState extends State<MyApp> {
               FlatButton(
                 child: Text('打印'),
                 onPressed:  () async {
-                  await BluetoothPrint.print();
+                  List<LineText> list = List();
+                  list.add(LineText(type: LineText.TYPE_TEXT, content: '我是一个测试i', align: LineText.ALIGN_LEFT,linefeed: 0));
+                  list.add(LineText(type: LineText.TYPE_TEXT, content: '在右边', align: LineText.ALIGN_RIGHT,linefeed: 0));
+                  list.add(LineText(linefeed: 1));
+                  list.add(LineText(type: LineText.TYPE_QRCODE, content: '我是一个测试i\n', size:10, align: LineText.ALIGN_CENTER, linefeed: 1));
+                  await BluetoothPrint.print(list);
                 },
               ),
               FlatButton(

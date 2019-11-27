@@ -47,7 +47,7 @@ public class BluetoothPrintPlugin implements MethodCallHandler {
         result.success(destroy());
         break;
       case "print":
-        print(result);
+        print(result, args);
         break;
       case "printTest":
         printTest(result);
@@ -146,22 +146,28 @@ public class BluetoothPrintPlugin implements MethodCallHandler {
     return result;
   }
 
-  private Result print(Result result) {
+  private Result print(Result result, Map<String, Object> args) {
     if (DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id] == null ||
             !DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].getConnState()) {
 
       result.error("not connect", "state not right", null);
     }
 
-    threadPool = ThreadPool.getInstantiation();
-    threadPool.addSerialTask(new Runnable() {
-      @Override
-      public void run() {
-        if (DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].getCurrentPrinterCommand() == PrinterCommand.ESC) {
-          DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].sendDataImmediately(PrintContent.getReceipt());
+    if (args.containsKey("datas")) {
+      final List<Map<String,Object>> list = (List)args.get("datas");
+
+      threadPool = ThreadPool.getInstantiation();
+      threadPool.addSerialTask(new Runnable() {
+        @Override
+        public void run() {
+          if (DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].getCurrentPrinterCommand() == PrinterCommand.ESC) {
+            DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].sendDataImmediately(PrintContent.mapToReceipt(list));
+          }
         }
-      }
-    });
+      });
+    }else{
+      result.error("no datas", "", null);
+    }
 
     return result;
   }
