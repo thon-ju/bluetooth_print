@@ -21,7 +21,6 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   BluetoothPrint bluetoothPrint = BluetoothPrint.instance;
 
-  String _platformVersion = 'Unknown';
   List<BluetoothDevice> _list = [];
   bool _connected = false;
   BluetoothDevice _device;
@@ -29,24 +28,8 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    initPlatformState();
 
     initBluetooth();
-  }
-
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    try {
-      platformVersion = await bluetoothPrint.platformVersion;
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -57,8 +40,9 @@ class _MyAppState extends State<MyApp> {
       print('${e.name} ${e.address}');
     });
 
-    bluetoothPrint.onStateChanged().listen((state) {
+    bluetoothPrint.state.listen((state) {
       print('cur device status: $state');
+
       switch (state) {
         case BluetoothPrint.CONNECTED:
           setState(() {
@@ -98,9 +82,6 @@ class _MyAppState extends State<MyApp> {
         body: Container(
           child: ListView(
             children: <Widget>[
-              Center(
-                child: Text('Running on: $_platformVersion\n'),
-              ),
               Container(
                 height: 300.0,
                 child: ListView.builder(
@@ -131,16 +112,20 @@ class _MyAppState extends State<MyApp> {
                       children: <Widget>[
                         OutlineButton(
                           child: Text('连接'),
-                          onPressed:  () async {
-                            await bluetoothPrint.connect(_device);
+                          onPressed:  _connected?null:() async {
+                            if(_device!=null && _device.address !=null){
+                              await bluetoothPrint.connect(_device);
+                            }else{
+                              print('请选择设备');
+                            }
                           },
                         ),
                         SizedBox(width: 10.0),
                         OutlineButton(
                           child: Text('断开'),
-                          onPressed:  () async {
+                          onPressed:  _connected?() async {
                             await bluetoothPrint.disconnect();
-                          },
+                          }:null,
                         ),
                       ],
                     ),
@@ -149,7 +134,7 @@ class _MyAppState extends State<MyApp> {
                       children: <Widget>[
                         OutlineButton(
                           child: Text('打印'),
-                          onPressed:  () async {
+                          onPressed:  _connected?() async {
                             List<LineText> list = List();
                             list.add(LineText(type: LineText.TYPE_TEXT, content: '我是一个测试i', align: LineText.ALIGN_LEFT,linefeed: 0));
                             list.add(LineText(type: LineText.TYPE_TEXT, content: '在右边', align: LineText.ALIGN_RIGHT,linefeed: 0));
@@ -162,14 +147,14 @@ class _MyAppState extends State<MyApp> {
                             String base64Image = base64Encode(imageBytes);
                             list.add(LineText(type: LineText.TYPE_IMAGE, content: base64Image, align: LineText.ALIGN_CENTER, linefeed: 1));
                             await bluetoothPrint.print(list);
-                          },
+                          }:null,
                         ),
                         SizedBox(width: 10.0),
                         OutlineButton(
                           child: Text('打印自检'),
-                          onPressed:  () async {
+                          onPressed:  _connected?() async {
                             await bluetoothPrint.printTest();
-                          },
+                          }:null,
                         )
                       ],
                     )

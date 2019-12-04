@@ -6,7 +6,7 @@
 - [x] print text    
 - [x] print image          
 - [x] print qrcode 
-- [ ] display connect status         
+- [x] display connect status         
 
 ## ios       
 - [ ] get devices    

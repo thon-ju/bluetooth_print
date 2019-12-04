@@ -1,8 +1,11 @@
 package com.example.bluetooth_print;
 
+import android.app.Activity;
+import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -23,38 +26,34 @@ import io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener;
 import java.util.*;
 
 /** BluetoothPrintPlugin */
-public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissionsResultListener  {
+public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissionsResultListener {
   private static final String TAG = "BluetoothPrintPlugin";
   private int id = 0;
   private ThreadPool threadPool;
   private static final int REQUEST_COARSE_LOCATION_PERMISSIONS = 1451;
   private static final String NAMESPACE = "bluetooth_print";
-
   private final Registrar registrar;
+  private final Activity activity;
+  private final MethodChannel channel;
+  private final EventChannel stateChannel;
+  private final BluetoothManager mBluetoothManager;
   private BluetoothAdapter mBluetoothAdapter;
   private Result pendingResult;
-
-  private EventSink readSink;
-  private EventSink statusSink;
 
   public static void registerWith(Registrar registrar) {
     final BluetoothPrintPlugin instance = new BluetoothPrintPlugin(registrar);
     registrar.addRequestPermissionsResultListener(instance);
   }
 
-  BluetoothPrintPlugin(Registrar registrar){
-    this.registrar = registrar;
-    MethodChannel channel = new MethodChannel(registrar.messenger(), NAMESPACE + "/methods");
-    EventChannel stateChannel = new EventChannel(registrar.messenger(), NAMESPACE + "/state");
-    EventChannel readChannel = new EventChannel(registrar.messenger(), NAMESPACE + "/read");
-    if (registrar.activity() != null){
-      BluetoothManager mBluetoothManager = (BluetoothManager) registrar.activity().getSystemService(Context.BLUETOOTH_SERVICE);
-      assert mBluetoothManager != null;
-      this.mBluetoothAdapter = mBluetoothManager.getAdapter();
-    }
+  BluetoothPrintPlugin(Registrar r){
+    this.registrar = r;
+    this.activity = r.activity();
+    this.channel = new MethodChannel(registrar.messenger(), NAMESPACE + "/methods");
+    this.stateChannel = new EventChannel(registrar.messenger(), NAMESPACE + "/state");
+    this.mBluetoothManager = (BluetoothManager) registrar.activity().getSystemService(Context.BLUETOOTH_SERVICE);
+    this.mBluetoothAdapter = mBluetoothManager.getAdapter();
     channel.setMethodCallHandler(this);
     stateChannel.setStreamHandler(stateStreamHandler);
-    readChannel.setStreamHandler(readResultsHandler);
   }
 
   @Override
@@ -67,11 +66,14 @@ public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissio
     final Map<String, Object> args = call.arguments();
 
     switch (call.method){
-      case "getPlatformVersion":
-        result.success("Android " + android.os.Build.VERSION.RELEASE);
+      case "state":
+        state(result);
         break;
       case "isAvailable":
         result.success(mBluetoothAdapter != null);
+        break;
+      case "isOn":
+        result.success(mBluetoothAdapter.isEnabled());
         break;
       case "isConnected":
         result.success(threadPool != null);
@@ -115,6 +117,35 @@ public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissio
   }
 
   /**
+   * 获取状态
+   */
+  private Result state(Result result){
+    try {
+      switch(mBluetoothAdapter.getState()) {
+        case BluetoothAdapter.STATE_OFF:
+          result.success(BluetoothAdapter.STATE_OFF);
+          break;
+        case BluetoothAdapter.STATE_ON:
+          result.success(BluetoothAdapter.STATE_ON);
+          break;
+        case BluetoothAdapter.STATE_TURNING_OFF:
+          result.success(BluetoothAdapter.STATE_TURNING_OFF);
+          break;
+        case BluetoothAdapter.STATE_TURNING_ON:
+          result.success(BluetoothAdapter.STATE_TURNING_ON);
+          break;
+        default:
+          result.success(0);
+          break;
+      }
+    } catch (SecurityException e) {
+      result.error("invalid_argument", "argument 'address' not found", null);
+    }
+
+    return result;
+  }
+
+  /**
    * 连接
    */
   private Result connect(Result result, Map<String, Object> args){
@@ -150,6 +181,7 @@ public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissio
    * 重新连接回收上次连接的对象，避免内存泄漏
    */
   private boolean disconnect(){
+
     if(DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id]!=null&&DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].mPort!=null) {
       DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].reader.cancel();
       DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].mPort.closePort();
@@ -226,53 +258,47 @@ public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissio
       return true;
     }
     return false;
+
   }
 
+
+
   private final StreamHandler stateStreamHandler = new StreamHandler() {
+    private EventSink sink;
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
       @Override
       public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
-
-        Log.d(TAG, action);
+        Log.d(TAG, "stateStreamHandler, current action: " + action);
 
         if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
           threadPool = null;
-          statusSink.success(intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1));
+          sink.success(intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1));
         } else if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
-          statusSink.success(1);
+          sink.success(1);
         } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
           threadPool = null;
-          statusSink.success(0);
+          sink.success(0);
         }
       }
     };
 
     @Override
     public void onListen(Object o, EventSink eventSink) {
-      statusSink = eventSink;
-      registrar.activity().registerReceiver(mReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
-      registrar.activeContext().registerReceiver(mReceiver, new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED));
-      registrar.activeContext().registerReceiver(mReceiver, new IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED));
+      sink = eventSink;
+      IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+      filter.addAction(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED);
+      filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+      filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+      activity.registerReceiver(mReceiver, filter);
     }
 
     @Override
     public void onCancel(Object o) {
-      statusSink = null;
-      registrar.activity().unregisterReceiver(mReceiver);
+      sink = null;
+      activity.unregisterReceiver(mReceiver);
     }
   };
 
-  private final StreamHandler readResultsHandler = new StreamHandler() {
-    @Override
-    public void onListen(Object o, EventSink eventSink) {
-      readSink = eventSink;
-    }
-
-    @Override
-    public void onCancel(Object o) {
-      readSink = null;
-    }
-  };
 }

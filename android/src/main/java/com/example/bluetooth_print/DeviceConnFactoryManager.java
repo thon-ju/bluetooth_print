@@ -406,8 +406,19 @@ public class DeviceConnFactoryManager {
             }
         }
     }
-    public int readDataImmediately(byte[] buffer) throws IOException {
-        return this.mPort.readData(buffer);
+    public int readDataImmediately(byte[] buffer){
+        int r = 0;
+        if (this.mPort == null) {
+            return r;
+        }
+
+        try {
+            r =  this.mPort.readData(buffer);
+        } catch (IOException e) {
+
+        }
+
+        return  r;
     }
 
     /**
@@ -512,7 +523,8 @@ public class DeviceConnFactoryManager {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case Constant.abnormal_Disconnection://异常断开连接
-
+                    Log.d(TAG, "abnormal disconnection");
+                    sendStateBroadcast(Constant.abnormal_Disconnection);
                     break;
                 case DEFAUIT_COMMAND://默认模式
 
@@ -530,12 +542,25 @@ public class DeviceConnFactoryManager {
                         //设置当前打印机模式为ESC模式
                         if (currentPrinterCommand == null) {
                             currentPrinterCommand = PrinterCommand.ESC;
-
+                            sendStateBroadcast(CONN_STATE_CONNECTED);
                         } else {//查询打印机状态
                             if (result == 0) {//打印机状态查询
-
+                                Intent intent = new Intent(ACTION_QUERY_PRINTER_STATE);
+                                intent.putExtra(DEVICE_ID, id);
+                                if(mContext!=null){
+                                    mContext.sendBroadcast(intent);
+                                }
                             } else if (result == 1) {//查询打印机实时状态
-
+                                if ((buffer[0] & ESC_STATE_PAPER_ERR) > 0) {
+                                    status += " Printer out of paper";
+                                }
+                                if ((buffer[0] & ESC_STATE_COVER_OPEN) > 0) {
+                                    status += " Printer open cover";
+                                }
+                                if ((buffer[0] & ESC_STATE_ERR_OCCURS) > 0) {
+                                    status += " Printer error";
+                                }
+                                Log.d(TAG, status);
                             }
                         }
                     }
@@ -547,12 +572,23 @@ public class DeviceConnFactoryManager {
     };
 
     /**
+     * 发送广播
+     * @param state
+     */
+    private void sendStateBroadcast(int state) {
+        Intent intent = new Intent(ACTION_CONN_STATE);
+        intent.putExtra(STATE, state);
+        intent.putExtra(DEVICE_ID, id);
+        if(mContext != null){
+            mContext.sendBroadcast(intent);//此处若报空指针错误，需要在清单文件application标签里注册此类，参考demo
+        }
+    }
+
+    /**
      * 判断是实时状态（10 04 02）还是查询状态（1D 72 01）
      */
     private int judgeResponseType(byte r) {
         return (byte) ((r & FLAG) >> 4);
     }
-
-
 
 }

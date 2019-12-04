@@ -6,15 +6,15 @@ import 'bluetooth_device.dart';
 import 'line_text.dart';
 
 class BluetoothPrint {
-  static const String namespace = 'bluetooth_print';
+  static const String NAMESPACE = 'bluetooth_print';
   static const int CONNECTED = 1;
   static const int DISCONNECTED = 0;
 
-  static const MethodChannel _channel = const MethodChannel('$namespace/methods');
-  static const EventChannel _readChannel = const EventChannel('$namespace/read');
-  static const EventChannel _stateChannel = const EventChannel('$namespace/state');
+  static const MethodChannel _channel = const MethodChannel('$NAMESPACE/methods');
+  static const EventChannel _stateChannel = const EventChannel('$NAMESPACE/state');
 
   final StreamController<MethodCall> _methodStreamController = new StreamController.broadcast();
+  Stream<MethodCall> get _methodStream => _methodStreamController.stream;
 
   BluetoothPrint._() {
     _channel.setMethodCallHandler((MethodCall call) {
@@ -26,14 +26,21 @@ class BluetoothPrint {
 
   static BluetoothPrint get instance => _instance;
 
-  Stream<int> onStateChanged() =>  _stateChannel.receiveBroadcastStream().map((buffer) => buffer);
+  Future<bool> get isAvailable async => await _channel.invokeMethod('isAvailable').then<bool>((d) => d);
 
-  Stream<String> onRead() => _readChannel.receiveBroadcastStream().map((buffer) => buffer.toString());
+  Future<bool> get isOn async => await _channel.invokeMethod('isOn').then<bool>((d) => d);
 
+  Future<bool> get isConnected async => await _channel.invokeMethod('isConnected');
 
-  Future<String> get platformVersion async {
-    final String version = await _channel.invokeMethod('getPlatformVersion');
-    return version;
+  /// Gets the current state of the Bluetooth module
+  Stream<int> get state async* {
+    yield await _channel
+        .invokeMethod('state')
+        .then((s) => s);
+
+    yield* _stateChannel
+        .receiveBroadcastStream()
+        .map((s) => s);
   }
 
   Future<List<BluetoothDevice>> getBondedDevices() async {
@@ -41,9 +48,7 @@ class BluetoothPrint {
     return list.map((map) => BluetoothDevice.fromMap(map)).toList();
   }
 
-  Future<bool> get isAvailable async => await _channel.invokeMethod('isAvailable');
 
-  Future<bool> get isConnected async => await _channel.invokeMethod('isConnected');
 
   Future<dynamic> connect(BluetoothDevice device) => _channel.invokeMethod('connect', device.toMap());
 
