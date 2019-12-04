@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 
-import 'bluetooth_device.dart';
-import 'line_text.dart';
+import 'bluetooth_print_model.dart';
 
 class BluetoothPrint {
   static const String NAMESPACE = 'bluetooth_print';
@@ -45,12 +44,12 @@ class BluetoothPrint {
 
   Future<List<BluetoothDevice>> getBondedDevices() async {
     final List list = await _channel.invokeMethod('getDevices');
-    return list.map((map) => BluetoothDevice.fromMap(map)).toList();
+    return list.map((map) => BluetoothDevice.fromJson(Map<String, dynamic>.from(map))).toList();
   }
 
 
 
-  Future<dynamic> connect(BluetoothDevice device) => _channel.invokeMethod('connect', device.toMap());
+  Future<dynamic> connect(BluetoothDevice device) => _channel.invokeMethod('connect', device.toJson());
 
   Future<dynamic> disconnect() => _channel.invokeMethod('disconnect');
 
@@ -58,7 +57,7 @@ class BluetoothPrint {
 
   Future<dynamic> print(List<LineText> list) {
     Map<String, Object> args = Map();
-    args['datas'] = list.map((m){return m.toMap();}).toList();
+    args['datas'] = list.map((m){return m.toJson();}).toList();
     _channel.invokeMethod('print', args);
   }
 

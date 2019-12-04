@@ -7,9 +7,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:bluetooth_print/bluetooth_print.dart';
-import 'package:bluetooth_print/bluetooth_device.dart';
-import 'package:bluetooth_print/line_text.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:bluetooth_print/bluetooth_print_model.dart';
 
 void main() => runApp(MyApp());
 
