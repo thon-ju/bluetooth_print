@@ -23,8 +23,6 @@ BluetoothPrint is a bluetooth plugin for [Flutter](http://www.flutter.io), a new
 
 [Example](https://github.com/thon-ju/bluetooth_print/blob/master/example/lib/main.dart)
 
-[Example](https://github.com/dlutton/flutter_tts/blob/master/example/lib/main.dart)
-
 To use this plugin :
 
 - add the dependency to your [pubspec.yaml](https://github.com/thon-ju/bluetooth_print/blob/master/example/pubspec.yaml) file.
@@ -36,7 +34,7 @@ To use this plugin :
     bluetooth_print:
 ```
 
-- instantiate a BluetoothPrint instance
+- init a BluetoothPrint instance
 
 ```dart
 import 'package:bluetooth_print/bluetooth_print.dart';
