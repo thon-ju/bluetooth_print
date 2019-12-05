@@ -13,11 +13,11 @@ class BluetoothPrint {
   static const EventChannel _stateChannel = const EventChannel('$NAMESPACE/state');
 
   final StreamController<MethodCall> _methodStreamController = new StreamController.broadcast();
-  Stream<MethodCall> get _methodStream => _methodStreamController.stream;
 
   BluetoothPrint._() {
     _channel.setMethodCallHandler((MethodCall call) {
       _methodStreamController.add(call);
+      return;
     });
   }
 
@@ -59,6 +59,7 @@ class BluetoothPrint {
     Map<String, Object> args = Map();
     args['datas'] = list.map((m){return m.toJson();}).toList();
     _channel.invokeMethod('print', args);
+    return Future.value(true);
   }
 
   Future<dynamic> printTest() => _channel.invokeMethod('printTest');

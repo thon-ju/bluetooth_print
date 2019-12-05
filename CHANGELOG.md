@@ -1,3 +1,7 @@
+## 0.1.0
+
+* finished android features.
+
 ## 0.0.5
 
 * fixed some bugs, opt readme.
