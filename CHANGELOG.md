@@ -1,3 +1,11 @@
+## 0.0.5
+
+* fixed some bugs, opt readme.
+
+## 0.0.4
+
+* fixed some bugs.
+
 ## 0.0.3
 
 * opt android print, add status display.

@@ -1,11 +1,9 @@
 package com.example.bluetooth_print;
 
 import android.app.Activity;
-import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
-import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -119,7 +117,7 @@ public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissio
   /**
    * 获取状态
    */
-  private Result state(Result result){
+  private void state(Result result){
     try {
       switch(mBluetoothAdapter.getState()) {
         case BluetoothAdapter.STATE_OFF:
@@ -142,13 +140,12 @@ public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissio
       result.error("invalid_argument", "argument 'address' not found", null);
     }
 
-    return result;
   }
 
   /**
    * 连接
    */
-  private Result connect(Result result, Map<String, Object> args){
+  private void connect(Result result, Map<String, Object> args){
     if (args.containsKey("address")) {
       String address = (String) args.get("address");
       disconnect();
@@ -174,7 +171,6 @@ public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissio
       result.error("invalid_argument", "argument 'address' not found", null);
     }
 
-    return result;
   }
 
   /**
@@ -199,7 +195,7 @@ public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissio
     return true;
   }
 
-  private Result printTest(Result result) {
+  private void printTest(Result result) {
     if (DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id] == null ||
             !DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].getConnState()) {
 
@@ -216,10 +212,10 @@ public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissio
       }
     });
 
-    return result;
   }
 
-  private Result print(Result result, Map<String, Object> args) {
+  @SuppressWarnings("unchecked")
+  private void print(Result result, Map<String, Object> args) {
     if (DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id] == null ||
             !DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].getConnState()) {
 
@@ -227,7 +223,10 @@ public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissio
     }
 
     if (args.containsKey("datas")) {
-      final List<Map<String,Object>> list = (List)args.get("datas");
+      final List<Map<String,Object>> list = (List<Map<String,Object>>)args.get("datas");
+      if(list == null){
+        return;
+      }
 
       threadPool = ThreadPool.getInstantiation();
       threadPool.addSerialTask(new Runnable() {
@@ -242,7 +241,6 @@ public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissio
       result.error("no datas", "", null);
     }
 
-    return result;
   }
 
   @Override
