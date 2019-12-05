@@ -8,6 +8,9 @@ BluetoothPrint is a bluetooth plugin for [Flutter](http://www.flutter.io), a new
 
 
 ## Features
+
+ios features maybe finished before this month end(eg. 2019/12/30)       
+
 |                         |      Android       |         iOS          |             Description            |
 | :---------------        | :----------------: | :------------------: |  :-------------------------------- |
 | select devices          | :white_check_mark: |                      | scan for Bluetooth Low Energy devices and select. |
