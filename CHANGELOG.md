@@ -1,3 +1,7 @@
+## 0.1.1
+
+* support more gprinter devices.
+
 ## 0.1.0
 
 * finished android features.
