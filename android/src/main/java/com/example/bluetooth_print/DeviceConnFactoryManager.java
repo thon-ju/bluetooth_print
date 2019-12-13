@@ -563,6 +563,53 @@ public class DeviceConnFactoryManager {
                                 Log.d(TAG, status);
                             }
                         }
+                    }else if (sendCommand == tsc) {
+                        //设置当前打印机模式为TSC模式
+                        if (currentPrinterCommand == null) {
+                            currentPrinterCommand = PrinterCommand.TSC;
+                            sendStateBroadcast(CONN_STATE_CONNECTED);
+                        } else {
+                            if (cnt == 1) {//查询打印机实时状态
+                                if ((buffer[0] & TSC_STATE_PAPER_ERR) > 0) {//缺纸
+                                    status += " Printer out of paper";
+                                }
+                                if ((buffer[0] & TSC_STATE_COVER_OPEN) > 0) {//开盖
+                                    status += " Printer open cover";
+                                }
+                                if ((buffer[0] & TSC_STATE_ERR_OCCURS) > 0) {//打印机报错
+                                    status += " Printer error";
+                                }
+                                Log.d(TAG, status);
+                            } else {//打印机状态查询
+                                Intent intent = new Intent(ACTION_QUERY_PRINTER_STATE);
+                                intent.putExtra(DEVICE_ID, id);
+                                if(mContext!=null){
+                                    mContext.sendBroadcast(intent);
+                                }
+                            }
+                        }
+                    }else if(sendCommand==cpcl){
+                        if (currentPrinterCommand == null) {
+                            currentPrinterCommand = PrinterCommand.CPCL;
+                            sendStateBroadcast(CONN_STATE_CONNECTED);
+                        }else {
+                            if (cnt == 1) {
+
+                                if ((buffer[0] ==CPCL_STATE_PAPER_ERR)) {//缺纸
+                                    status += " Printer out of paper";
+                                }
+                                if ((buffer[0] ==CPCL_STATE_COVER_OPEN)) {//开盖
+                                    status += " Printer open cover";
+                                }
+                                Log.d(TAG, status);
+                            } else {//打印机状态查询
+                                Intent intent = new Intent(ACTION_QUERY_PRINTER_STATE);
+                                intent.putExtra(DEVICE_ID, id);
+                                if(mContext!=null){
+                                    mContext.sendBroadcast(intent);
+                                }
+                            }
+                        }
                     }
                     break;
                 default:

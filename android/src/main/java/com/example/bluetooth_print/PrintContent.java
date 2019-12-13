@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
 import android.util.Log;
+import com.gprinter.command.CpclCommand;
 import com.gprinter.command.EscCommand;
 import com.gprinter.command.LabelCommand;
 
@@ -110,6 +111,91 @@ public class PrintContent {
       }
 
       /**
+       * 标签打印测试页
+       * @return
+       */
+      public static Vector<Byte> getLabel() {
+            LabelCommand tsc = new LabelCommand();
+            // 设置标签尺寸宽高，按照实际尺寸设置 单位mm
+            tsc.addSize(60, 75);
+            // 设置标签间隙，按照实际尺寸设置，如果为无间隙纸则设置为0 单位mm
+            tsc.addGap(0);
+            // 设置打印方向
+            tsc.addDirection(LabelCommand.DIRECTION.FORWARD, LabelCommand.MIRROR.NORMAL);
+            // 开启带Response的打印，用于连续打印
+            tsc.addQueryPrinterStatus(LabelCommand.RESPONSE_MODE.ON);
+            // 设置原点坐标
+            tsc.addReference(0, 0);
+            //设置浓度
+            tsc.addDensity(LabelCommand.DENSITY.DNESITY4);
+            // 撕纸模式开启
+            tsc.addTear(EscCommand.ENABLE.ON);
+            // 清除打印缓冲区
+            tsc.addCls();
+            // 绘制简体中文
+            tsc.addText(10, 0, LabelCommand.FONTTYPE.SIMPLIFIED_CHINESE, LabelCommand.ROTATION.ROTATION_0, LabelCommand.FONTMUL.MUL_1, LabelCommand.FONTMUL.MUL_1,
+                    "欢迎使用Printer");
+            //打印繁体
+            tsc.addUnicodeText(10,32, LabelCommand.FONTTYPE.TRADITIONAL_CHINESE, LabelCommand.ROTATION.ROTATION_0, LabelCommand.FONTMUL.MUL_1, LabelCommand.FONTMUL.MUL_1,"BIG5碼繁體中文字元","BIG5");
+            //打印韩文
+            tsc.addUnicodeText(10,60, LabelCommand.FONTTYPE.KOREAN, LabelCommand.ROTATION.ROTATION_0, LabelCommand.FONTMUL.MUL_1, LabelCommand.FONTMUL.MUL_1,"Korean 지아보 하성","EUC_KR");
+//            Bitmap b = BitmapFactory.decodeResource(App.getContext().getResources(), R.drawable.gprinter);
+//            // 绘制图片
+//            tsc.addBitmap(10, 80, LabelCommand.BITMAP_MODE.OVERWRITE, 300, b);
+
+            //绘制二维码
+            tsc.addQRCode(10,380, LabelCommand.EEC.LEVEL_L, 5, LabelCommand.ROTATION.ROTATION_0, " www.smarnet.cc");
+            // 绘制一维条码
+            tsc.add1DBarcode(10, 500, LabelCommand.BARCODETYPE.CODE128, 100, LabelCommand.READABEL.EANBEL, LabelCommand.ROTATION.ROTATION_0, "SMARNET");
+            // 打印标签
+            tsc.addPrint(1, 1);
+            // 打印标签后 蜂鸣器响
+            tsc.addSound(2, 100);
+            //开启钱箱
+            tsc.addCashdrwer(LabelCommand.FOOT.F5, 255, 255);
+            Vector<Byte> datas = tsc.getCommand();
+            // 发送数据
+            return  datas;
+      }
+
+      /**
+       * 面单打印测试页
+       * @return
+       */
+      public static Vector<Byte> getCPCL() {
+            CpclCommand cpcl = new CpclCommand();
+            cpcl.addInitializePrinter(1130, 1);
+            cpcl.addJustification(CpclCommand.ALIGNMENT.CENTER);
+            cpcl.addSetmag(1, 1);
+            cpcl.addText(CpclCommand.TEXT_FONT.FONT_4, 0, 30, "Sample");
+            cpcl.addSetmag(0, 0);
+            cpcl.addJustification(CpclCommand.ALIGNMENT.LEFT);
+            cpcl.addText(CpclCommand.TEXT_FONT.FONT_4, 0, 65, "Print text");
+            cpcl.addText(CpclCommand.TEXT_FONT.FONT_4, 0, 95, "Welcom to use SMARNET printer!");
+            cpcl.addText(CpclCommand.TEXT_FONT.FONT_13, 0, 135, "佳博智匯標籤打印機");
+            cpcl.addText(CpclCommand.TEXT_FONT.FONT_4, 0, 195, "智汇");
+            cpcl.addJustification(CpclCommand.ALIGNMENT.CENTER);
+            cpcl.addText(CpclCommand.TEXT_FONT.FONT_4, 0, 195, "网络");
+            cpcl.addJustification(CpclCommand.ALIGNMENT.RIGHT);
+            cpcl.addText(CpclCommand.TEXT_FONT.FONT_4, 0, 195, "设备");
+            cpcl.addJustification(CpclCommand.ALIGNMENT.LEFT);
+            cpcl.addText(CpclCommand.TEXT_FONT.FONT_4, 0, 230, "Print bitmap!");
+//            Bitmap bitmap = BitmapFactory.decodeResource(App.getContext().getResources(), R.drawable.gprinter);
+//            cpcl.addEGraphics(0, 255, 385, bitmap);
+            cpcl.addText(CpclCommand.TEXT_FONT.FONT_4, 0, 645, "Print code128!");
+            cpcl.addBarcodeText(5, 2);
+            cpcl.addBarcode(CpclCommand.COMMAND.BARCODE, CpclCommand.CPCLBARCODETYPE.CODE128, 50, 0, 680, "SMARNET");
+            cpcl.addText(CpclCommand.TEXT_FONT.FONT_4, 0, 775, "Print QRcode");
+            cpcl.addBQrcode(0, 810, "QRcode");
+            cpcl.addJustification(CpclCommand.ALIGNMENT.CENTER);
+            cpcl.addText(CpclCommand.TEXT_FONT.FONT_4, 0, 1010, "Completed");
+            cpcl.addJustification(CpclCommand.ALIGNMENT.LEFT);
+            cpcl.addPrint();
+            Vector<Byte> datas = cpcl.getCommand();
+            return datas;
+      }
+
+      /**
        * 票据打印对象转换
        * @return
        */
@@ -206,6 +292,31 @@ public class PrintContent {
             //添加用户指令
             esc.addUserCommand(bytes);
             Vector<Byte> datas = esc.getCommand();
+            return datas;
+      }
+
+      /**
+       * 标签打印对象转换
+       * @return
+       */
+      public static Vector<Byte> mapToLabel(List<Map<String,Object>> list) {
+            LabelCommand tsc = new LabelCommand();
+
+
+            Vector<Byte> datas = tsc.getCommand();
+            // 发送数据
+            return  datas;
+      }
+
+      /**
+       * 面单打印对象转换
+       * @return
+       */
+      public static Vector<Byte> mapToCPCL(List<Map<String,Object>> list) {
+            CpclCommand cpcl = new CpclCommand();
+
+
+            Vector<Byte> datas = cpcl.getCommand();
             return datas;
       }
 
