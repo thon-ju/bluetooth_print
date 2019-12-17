@@ -27,11 +27,16 @@
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
+  NSLog(@"call method -> %@", call.method);
+    
   if ([@"state" isEqualToString:call.method]) {
     result(nil);
   } else if([@"isAvailable" isEqualToString:call.method]) {
     
     result(@(YES));
+  } else if([@"isConnected" isEqualToString:call.method]) {
+    
+    result(@(NO));
   } else if([@"isOn" isEqualToString:call.method]) {
     result(@(YES));
   }else if([@"getDevices" isEqualToString:call.method]) {

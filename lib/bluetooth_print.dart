@@ -46,6 +46,9 @@ class BluetoothPrint {
 
   Future<List<BluetoothDevice>> getBondedDevices() async {
     final List list = await _channel.invokeMethod('getDevices');
+    if(list == null){
+      return List();
+    }
     return list
         .map((map) => BluetoothDevice.fromJson(Map<String, dynamic>.from(map)))
         .toList();
