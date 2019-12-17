@@ -1,3 +1,7 @@
+## 0.1.2
+
+* support print label(tsc command).
+
 ## 0.1.1
 
 * support more gprinter devices.

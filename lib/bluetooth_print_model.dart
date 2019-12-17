@@ -28,6 +28,8 @@ class LineText {
     this.height = 0, //0,1
     this.underline = 0, //0,1
     this.linefeed = 0, //0,1
+    this.x = 0,
+    this.y = 0
   });
 
   static const String TYPE_TEXT = 'text';
@@ -47,6 +49,8 @@ class LineText {
   final int height;
   final int underline;
   final int linefeed;
+  final int x;
+  final int y;
 
   factory LineText.fromJson(Map<String, dynamic> json) =>
       _$LineTextFromJson(json);

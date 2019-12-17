@@ -41,6 +41,8 @@ LineText _$LineTextFromJson(Map<String, dynamic> json) {
     height: json['height'] as int,
     underline: json['underline'] as int,
     linefeed: json['linefeed'] as int,
+    x: json['x'] as int,
+    y: json['y'] as int,
   );
 }
 
@@ -62,5 +64,7 @@ Map<String, dynamic> _$LineTextToJson(LineText instance) {
   writeNotNull('height', instance.height);
   writeNotNull('underline', instance.underline);
   writeNotNull('linefeed', instance.linefeed);
+  writeNotNull('x', instance.x);
+  writeNotNull('y', instance.y);
   return val;
 }
