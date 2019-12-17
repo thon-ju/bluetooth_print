@@ -28,6 +28,11 @@
 	<string>Main</string>
     <key>NSBluetoothAlwaysUsageDescription</key>
     <string>print need bluetooth</string>
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>bluetooth-central</string>
+        <string>bluetooth-peripheral</string>
+    </array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

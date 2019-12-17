@@ -6,6 +6,9 @@
 @property(nonatomic, retain) NSObject<FlutterPluginRegistrar> *registrar;
 @property(nonatomic, retain) FlutterMethodChannel *channel;
 @property(nonatomic, retain) BluetoothPrintStreamHandler *stateStreamHandler;
+@property(nonatomic,strong)NSMutableArray *devices;
+@property(nonatomic,strong)NSMutableDictionary *dicts;
+@property (strong, nonatomic) IBOutlet UITableView *deviceList;
 @end
 
 @implementation BluetoothPrintPlugin
@@ -26,6 +29,20 @@
   [registrar addMethodCallDelegate:instance channel:channel];
 }
 
+-(NSMutableArray *)devices {
+    if (!_devices) {
+        _devices = [[NSMutableArray alloc]init];
+    }
+    return _devices;
+}
+
+-(NSMutableDictionary *)dicts {
+    if (!_dicts) {
+        _dicts = [[NSMutableDictionary alloc]init];
+    }
+    return _dicts;
+}
+
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
   NSLog(@"call method -> %@", call.method);
     
@@ -40,6 +57,31 @@
   } else if([@"isOn" isEqualToString:call.method]) {
     result(@(YES));
   }else if([@"getDevices" isEqualToString:call.method]) {
+      if (Manager.bleConnecter == nil) {
+          [Manager didUpdateState:^(NSInteger state) {
+              switch (state) {
+                  case CBCentralManagerStateUnsupported:
+                      NSLog(@"The platform/hardware doesn't support Bluetooth Low Energy.");
+                      break;
+                  case CBCentralManagerStateUnauthorized:
+                      NSLog(@"The app is not authorized to use Bluetooth Low Energy.");
+                      break;
+                  case CBCentralManagerStatePoweredOff:
+                      NSLog(@"Bluetooth is currently powered off.");
+                      break;
+                  case CBCentralManagerStatePoweredOn:
+                      [self startScane];
+                      NSLog(@"Bluetooth power on");
+                      break;
+                  case CBCentralManagerStateUnknown:
+                  default:
+                      break;
+              }
+          }];
+      } else {
+          [self startScane];
+      }
+      
       [Manager scanForPeripheralsWithServices:nil options:nil discover:^(CBPeripheral * _Nullable peripheral, NSDictionary<NSString *,id> * _Nullable advertisementData, NSNumber * _Nullable RSSI) {
           if (peripheral.name != nil) {
               NSLog(@"name -> %@",peripheral.name);
@@ -64,6 +106,19 @@
       result(e);
     }
   } 
+}
+
+-(void)startScane {
+    [Manager scanForPeripheralsWithServices:nil options:nil discover:^(CBPeripheral * _Nullable peripheral, NSDictionary<NSString *,id> * _Nullable advertisementData, NSNumber * _Nullable RSSI) {
+        if (peripheral.name != nil) {
+            NSLog(@"name -> %@",peripheral.name);
+            NSUInteger oldCounts = [self.dicts count];
+            [self.dicts setObject:peripheral forKey:peripheral.identifier.UUIDString];
+            if (oldCounts < [self.dicts count]) {
+                [_deviceList reloadData];
+            }
+        }
+    }];
 }
 
 @end
