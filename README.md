@@ -84,3 +84,8 @@ await bluetoothPrint.disconnect();
     });
 ```
 
+## KeyNotes   
+
+ios import third party library  [please ref](https://www.jianshu.com/p/a8a05ab9b895) 
+
+

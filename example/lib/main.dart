@@ -33,7 +33,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> initBluetooth() async {
     bool isConnected=await bluetoothPrint.isConnected;
     List<BluetoothDevice> list = await bluetoothPrint.getBondedDevices();
-    list.forEach((e){
+    list?.forEach((e){
       print('${e.name} ${e.address}');
     });
 
@@ -61,7 +61,7 @@ class _MyAppState extends State<MyApp> {
     if (!mounted) return;
 
     setState(() {
-      _list = list;
+      _list = list??[];
     });
 
     if(isConnected) {
@@ -94,7 +94,7 @@ class _MyAppState extends State<MyApp> {
                 Container(
                   height: 400.0,
                   child: ListView.builder(
-                      itemCount: _list.length,
+                      itemCount: _list?.length,
                       itemBuilder: (context, index){
                         return ListTile(
                           title: Text('${_list[index].name}'),
@@ -114,7 +114,7 @@ class _MyAppState extends State<MyApp> {
                 ),
                 Divider(),
                 Container(
-                  padding: EdgeInsets.fromLTRB(20, 20, 20, 10),
+                  padding: EdgeInsets.fromLTRB(20, 5, 20, 10),
                   child: Column(
                     children: <Widget>[
                       Row(
@@ -142,61 +142,54 @@ class _MyAppState extends State<MyApp> {
                           ),
                         ],
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          OutlineButton(
-                            child: Text('print receipt(esc)'),
-                            onPressed:  _connected?() async {
-                              Map<String, dynamic> config = Map();
-                              List<LineText> list = List();
-                              list.add(LineText(type: LineText.TYPE_TEXT, content: 'It is a test', align: LineText.ALIGN_LEFT,linefeed: 0));
-                              list.add(LineText(type: LineText.TYPE_TEXT, content: '在右边', align: LineText.ALIGN_RIGHT,linefeed: 0));
-                              list.add(LineText(linefeed: 1));
-                              list.add(LineText(type: LineText.TYPE_QRCODE, content: 'qrcode i\n', size:10, align: LineText.ALIGN_CENTER, linefeed: 1));
-                              list.add(LineText(linefeed: 1));
+                      OutlineButton(
+                        child: Text('print receipt(esc)'),
+                        onPressed:  _connected?() async {
+                          Map<String, dynamic> config = Map();
+                          List<LineText> list = List();
+                          list.add(LineText(type: LineText.TYPE_TEXT, content: 'It is a test', align: LineText.ALIGN_LEFT,linefeed: 0));
+                          list.add(LineText(type: LineText.TYPE_TEXT, content: '在右边', align: LineText.ALIGN_RIGHT,linefeed: 0));
+                          list.add(LineText(linefeed: 1));
+                          list.add(LineText(type: LineText.TYPE_QRCODE, content: 'qrcode i\n', size:10, align: LineText.ALIGN_CENTER, linefeed: 1));
+                          list.add(LineText(linefeed: 1));
 
-                              ByteData data = await rootBundle.load("assets/images/guide3.png");
-                              List<int> imageBytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-                              String base64Image = base64Encode(imageBytes);
-                              list.add(LineText(type: LineText.TYPE_IMAGE, content: base64Image, align: LineText.ALIGN_CENTER, linefeed: 1));
-                              await bluetoothPrint.print(config, list);
-                            }:null,
-                          ),
-                          SizedBox(width: 10.0),
-                          OutlineButton(
-                            child: Text('print label(tsc)'),
-                            onPressed:  _connected?() async {
-                              Map<String, dynamic> config = Map();
-                              config['width'] = 40; // 标签宽度，单位mm
-                              config['height'] = 70; // 标签高度，单位mm
-                              config['gap'] = 2; // 标签间隔，单位mm
+                          ByteData data = await rootBundle.load("assets/images/guide3.png");
+                          List<int> imageBytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+                          String base64Image = base64Encode(imageBytes);
+                          list.add(LineText(type: LineText.TYPE_IMAGE, content: base64Image, align: LineText.ALIGN_CENTER, linefeed: 1));
+                          await bluetoothPrint.print(config, list);
+                        }:null,
+                      ),
+                      OutlineButton(
+                        child: Text('print label(tsc)'),
+                        onPressed:  _connected?() async {
+                          Map<String, dynamic> config = Map();
+                          config['width'] = 40; // 标签宽度，单位mm
+                          config['height'] = 70; // 标签高度，单位mm
+                          config['gap'] = 2; // 标签间隔，单位mm
 
-                              // x、y坐标位置，单位dpi，1mm=8dpi
-                              List<LineText> list = List();
-                              list.add(LineText(type: LineText.TYPE_TEXT, x:10, y:10, content: 'It is a test'));
-                              list.add(LineText(type: LineText.TYPE_TEXT, x:10, y:40, content: '在右边'));
-                              list.add(LineText(type: LineText.TYPE_QRCODE, x:10, y:70, content: 'qrcode i\n'));
-                              list.add(LineText(type: LineText.TYPE_BARCODE, x:10, y:190, content: 'qrcode i\n'));
+                          // x、y坐标位置，单位dpi，1mm=8dpi
+                          List<LineText> list = List();
+                          list.add(LineText(type: LineText.TYPE_TEXT, x:10, y:10, content: 'It is a test'));
+                          list.add(LineText(type: LineText.TYPE_TEXT, x:10, y:40, content: '在右边'));
+                          list.add(LineText(type: LineText.TYPE_QRCODE, x:10, y:70, content: 'qrcode i\n'));
+                          list.add(LineText(type: LineText.TYPE_BARCODE, x:10, y:190, content: 'qrcode i\n'));
 
-                              List<LineText> list1 = List();
-                              ByteData data = await rootBundle.load("assets/images/guide3.png");
-                              List<int> imageBytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-                              String base64Image = base64Encode(imageBytes);
-                              list1.add(LineText(type: LineText.TYPE_IMAGE, x:10, y:10, content: base64Image,));
+                          List<LineText> list1 = List();
+                          ByteData data = await rootBundle.load("assets/images/guide3.png");
+                          List<int> imageBytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+                          String base64Image = base64Encode(imageBytes);
+                          list1.add(LineText(type: LineText.TYPE_IMAGE, x:10, y:10, content: base64Image,));
 
-                              await bluetoothPrint.print(config, list);
-                              await bluetoothPrint.print(config, list1);
-                            }:null,
-                          ),
-                          SizedBox(width: 10.0),
-                          OutlineButton(
-                            child: Text('print selftest'),
-                            onPressed:  _connected?() async {
-                              await bluetoothPrint.printTest();
-                            }:null,
-                          )
-                        ],
+                          await bluetoothPrint.print(config, list);
+                          await bluetoothPrint.print(config, list1);
+                        }:null,
+                      ),
+                      OutlineButton(
+                        child: Text('print selftest'),
+                        onPressed:  _connected?() async {
+                          await bluetoothPrint.printTest();
+                        }:null,
                       )
                     ],
                   ),

@@ -6,6 +6,6 @@
 @interface BluetoothPrintPlugin : NSObject<FlutterPlugin, CBCentralManagerDelegate, CBPeripheralDelegate>
 @end
 
-@interface FlutterBlueStreamHandler : NSObject<FlutterStreamHandler>
+@interface BluetoothPrintStreamHandler : NSObject<FlutterStreamHandler>
 @property FlutterEventSink sink;
 @end
