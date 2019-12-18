@@ -13,7 +13,7 @@ ios features maybe finished before this month end(eg. 2019/12/30)
 
 |                         |      Android       |         iOS          |             Description            |
 | :---------------        | :----------------: | :------------------: |  :-------------------------------- |
-| select devices          | :white_check_mark: |                      | scan for Bluetooth Low Energy devices and select. |
+| scan                    | :white_check_mark: |  :white_check_mark:  | Starts a scan for Bluetooth Low Energy devices. |
 | connect                 | :white_check_mark: |                      | Establishes a connection to the device. |
 | disconnect              | :white_check_mark: |                      | Cancels an active or pending connection to the device. |
 | print test message      | :white_check_mark: |                      | print device test message. |
@@ -47,9 +47,31 @@ import 'package:bluetooth_print/bluetooth_print_model.dart';
 BluetoothPrint bluetoothPrint = BluetoothPrint.instance;
 ```
 
-### getDevices
+### scan
 ```dart
-List<BluetoothDevice> list = await bluetoothPrint.getBondedDevices();
+// begin scan
+bluetoothPrint.startScan(timeout: Duration(seconds: 4));
+
+// get devices
+StreamBuilder<List<BluetoothDevice>>(
+                    stream: bluetoothPrint.scanResults,
+                    initialData: [],
+                    builder: (c, snapshot) => Column(
+                      children: snapshot.data.map((d) => ListTile(
+                        title: Text(d.name??''),
+                        subtitle: Text(d.address),
+                        onTap: () async {
+                          setState(() {
+                            _device = d;
+                          });
+                        },
+                        trailing: _device!=null && _device.address == d.address?Icon(
+                          Icons.check,
+                          color: Colors.green,
+                        ):null,
+                      )).toList(),
+                    ),
+                  ),
 ```
 
 ### connect
@@ -84,8 +106,19 @@ await bluetoothPrint.disconnect();
     });
 ```
 
-## KeyNotes   
+## Troubleshooting
+#### ios import third party library
+[Please Read link: https://www.jianshu.com/p/a8a05ab9b895](https://www.jianshu.com/p/a8a05ab9b895) 
 
-ios import third party library  [please ref](https://www.jianshu.com/p/a8a05ab9b895) 
+#### error:'State restoration of CBCentralManager is only allowed for applications that have specified the "bluetooth-central" background mode'    
+info.plist add:
+```
+<key>UIBackgroundModes</key>
+<array>
+    <string>bluetooth-central</string>
+    <string>bluetooth-peripheral</string>
+</array>
+```
 
-
+## Thanks For
+- [flutter_blue](https://github.com/pauldemarco/flutter_blue)

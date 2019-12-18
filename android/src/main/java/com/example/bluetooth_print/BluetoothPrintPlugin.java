@@ -1,15 +1,22 @@
 package com.example.bluetooth_print;
 
+import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.util.Log;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import com.gprinter.command.FactoryCommand;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.EventChannel.EventSink;
@@ -39,6 +46,8 @@ public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissio
   private final EventChannel stateChannel;
   private final BluetoothManager mBluetoothManager;
   private BluetoothAdapter mBluetoothAdapter;
+
+  private MethodCall pendingCall;
   private Result pendingResult;
 
   public static void registerWith(Registrar registrar) {
@@ -79,8 +88,24 @@ public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissio
       case "isConnected":
         result.success(threadPool != null);
         break;
-      case "getDevices":
-        getDevices(result);
+      case "startScan":
+      {
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+          ActivityCompat.requestPermissions(
+                  activity,
+                  new String[] {Manifest.permission.ACCESS_COARSE_LOCATION},
+                  REQUEST_COARSE_LOCATION_PERMISSIONS);
+          pendingCall = call;
+          pendingResult = result;
+          break;
+        }
+        startScan(call, result);
+        break;
+      }
+      case "stopScan":
+        stopScan();
+        result.success(null);
         break;
       case "connect":
         connect(result, args);
@@ -143,6 +168,63 @@ public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissio
       result.error("invalid_argument", "argument 'address' not found", null);
     }
 
+  }
+
+
+  private void startScan(MethodCall call, Result result) {
+    Log.d(TAG,"start scan ");
+
+    try {
+      startScan();
+      result.success(null);
+    } catch (Exception e) {
+      result.error("startScan", e.getMessage(), e);
+    }
+  }
+
+  private void invokeMethodUIThread(final String name, final BluetoothDevice device)
+  {
+    final Map<String, Object> ret = new HashMap<>();
+    ret.put("address", device.getAddress());
+    ret.put("name", device.getName());
+    ret.put("type", device.getType());
+
+    activity.runOnUiThread(
+            new Runnable() {
+              @Override
+              public void run() {
+                channel.invokeMethod(name, ret);
+              }
+            });
+  }
+
+  private ScanCallback mScanCallback = new ScanCallback() {
+    @Override
+    public void onScanResult(int callbackType, ScanResult result) {
+      Log.d(TAG,"start scan 21 main start 3");
+
+      BluetoothDevice device = result.getDevice();
+      if(device != null && device.getName() != null){
+        invokeMethodUIThread("ScanResult", device);
+      }
+
+    }
+  };
+
+  private void startScan() throws IllegalStateException {
+    Log.d(TAG,"start scan 21 main start");
+    BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
+    if(scanner == null) throw new IllegalStateException("getBluetoothLeScanner() is null. Is the Adapter on?");
+
+    Log.d(TAG,"start scan 21 main start 1");
+    // 0:lowPower 1:balanced 2:lowLatency -1:opportunistic
+    ScanSettings settings = new ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build();
+    scanner.startScan(null, settings, mScanCallback);
+  }
+
+  private void stopScan() {
+    BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
+    if(scanner != null) scanner.stopScan(mScanCallback);
   }
 
   /**
@@ -260,7 +342,7 @@ public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissio
 
     if (requestCode == REQUEST_COARSE_LOCATION_PERMISSIONS) {
       if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-        getDevices(pendingResult);
+        startScan(pendingCall, pendingResult);
       } else {
         pendingResult.error("no_permissions", "this plugin requires location permissions for scanning", null);
         pendingResult = null;

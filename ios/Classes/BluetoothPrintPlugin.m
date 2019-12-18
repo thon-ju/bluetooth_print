@@ -6,9 +6,7 @@
 @property(nonatomic, retain) NSObject<FlutterPluginRegistrar> *registrar;
 @property(nonatomic, retain) FlutterMethodChannel *channel;
 @property(nonatomic, retain) BluetoothPrintStreamHandler *stateStreamHandler;
-@property(nonatomic,strong)NSMutableArray *devices;
 @property(nonatomic,strong)NSMutableDictionary *dicts;
-@property (strong, nonatomic) IBOutlet UITableView *deviceList;
 @end
 
 @implementation BluetoothPrintPlugin
@@ -27,13 +25,6 @@
   instance.stateStreamHandler = stateStreamHandler;
 
   [registrar addMethodCallDelegate:instance channel:channel];
-}
-
--(NSMutableArray *)devices {
-    if (!_devices) {
-        _devices = [[NSMutableArray alloc]init];
-    }
-    return _devices;
 }
 
 -(NSMutableDictionary *)dicts {
@@ -57,6 +48,8 @@
   } else if([@"isOn" isEqualToString:call.method]) {
     result(@(YES));
   }else if([@"getDevices" isEqualToString:call.method]) {
+      NSLog(@"getDevices method -> %@", call.method);
+      
       if (Manager.bleConnecter == nil) {
           [Manager didUpdateState:^(NSInteger state) {
               switch (state) {
@@ -82,25 +75,15 @@
           [self startScane];
       }
       
-      [Manager scanForPeripheralsWithServices:nil options:nil discover:^(CBPeripheral * _Nullable peripheral, NSDictionary<NSString *,id> * _Nullable advertisementData, NSNumber * _Nullable RSSI) {
-          if (peripheral.name != nil) {
-              NSLog(@"name -> %@",peripheral.name);
-          }
-      }];
     result(nil);
   } else if([@"connect" isEqualToString:call.method]) {
-    FlutterStandardTypedData *data = [call arguments];
-      
     @try {
-        
       result(nil);
     } @catch(FlutterError *e) {
       result(e);
     }
   } else if([@"disconnect" isEqualToString:call.method]) {
-    NSString *remoteId = [call arguments];
     @try {
-        
       result(nil);
     } @catch(FlutterError *e) {
       result(e);
@@ -111,14 +94,17 @@
 -(void)startScane {
     [Manager scanForPeripheralsWithServices:nil options:nil discover:^(CBPeripheral * _Nullable peripheral, NSDictionary<NSString *,id> * _Nullable advertisementData, NSNumber * _Nullable RSSI) {
         if (peripheral.name != nil) {
-            NSLog(@"name -> %@",peripheral.name);
-            NSUInteger oldCounts = [self.dicts count];
             [self.dicts setObject:peripheral forKey:peripheral.identifier.UUIDString];
-            if (oldCounts < [self.dicts count]) {
-                [_deviceList reloadData];
-            }
+            NSLog(@"find device -> %@", peripheral.name);
         }
     }];
+    
+    NSLog(@"return method -> %d", [[self.dicts allKeys]count]);
+    int a;
+    for( a = 0; a < [[self.dicts allKeys]count]; a = a + 1 ) {
+       CBPeripheral *peripheral = [self.dicts objectForKey:[self.dicts allKeys][a]];
+       NSLog(@"value of a: %@\n", peripheral.name);
+    }
 }
 
 @end
