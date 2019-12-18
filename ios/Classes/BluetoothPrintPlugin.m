@@ -6,7 +6,7 @@
 @property(nonatomic, retain) NSObject<FlutterPluginRegistrar> *registrar;
 @property(nonatomic, retain) FlutterMethodChannel *channel;
 @property(nonatomic, retain) BluetoothPrintStreamHandler *stateStreamHandler;
-@property(nonatomic,strong)NSMutableDictionary *dicts;
+@property(nonatomic) NSMutableDictionary *scannedPeripherals;
 @end
 
 @implementation BluetoothPrintPlugin
@@ -18,6 +18,7 @@
   BluetoothPrintPlugin* instance = [[BluetoothPrintPlugin alloc] init];
 
   instance.channel = channel;
+  instance.scannedPeripherals = [NSMutableDictionary new];
     
   // STATE
   BluetoothPrintStreamHandler* stateStreamHandler = [[BluetoothPrintStreamHandler alloc] init];
@@ -25,13 +26,6 @@
   instance.stateStreamHandler = stateStreamHandler;
 
   [registrar addMethodCallDelegate:instance channel:channel];
-}
-
--(NSMutableDictionary *)dicts {
-    if (!_dicts) {
-        _dicts = [[NSMutableDictionary alloc]init];
-    }
-    return _dicts;
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
@@ -47,8 +41,9 @@
     result(@(NO));
   } else if([@"isOn" isEqualToString:call.method]) {
     result(@(YES));
-  }else if([@"getDevices" isEqualToString:call.method]) {
+  }else if([@"startScan" isEqualToString:call.method]) {
       NSLog(@"getDevices method -> %@", call.method);
+      [self.scannedPeripherals removeAllObjects];
       
       if (Manager.bleConnecter == nil) {
           [Manager didUpdateState:^(NSInteger state) {
@@ -76,35 +71,92 @@
       }
       
     result(nil);
+  } else if([@"stopScan" isEqualToString:call.method]) {
+    [Manager stopScan];
+    result(nil);
   } else if([@"connect" isEqualToString:call.method]) {
+     NSString *remoteId = [call arguments];
     @try {
+      CBPeripheral *peripheral = [_scannedPeripherals objectForKey:remoteId];
+      [Manager connectPeripheral:peripheral options:nil];
       result(nil);
     } @catch(FlutterError *e) {
       result(e);
     }
   } else if([@"disconnect" isEqualToString:call.method]) {
     @try {
+      [Manager close];
       result(nil);
     } @catch(FlutterError *e) {
       result(e);
     }
-  } 
+  } else if([@"print" isEqualToString:call.method]) {
+     @try {
+       
+       [Manager write:[self escCommand]];
+       result(nil);
+     } @catch(FlutterError *e) {
+       result(e);
+     }
+   }
+}
+
+-(NSData *)escCommand{
+    EscCommand *command = [[EscCommand alloc]init];
+    [command addInitializePrinter];
+    [command addPrintAndFeedLines:5];
+    //内容居中
+    [command addSetJustification:1];
+    [command addPrintMode: 0|8|16|32];
+    [command addText:@"Print text\n"];
+    [command addPrintAndLineFeed];
+    [command addPrintMode: 0];
+    [command addText:@"Welcome to use Smarnet printer!"];
+    //换行
+    [command addPrintAndLineFeed];
+    //内容居左（默认居左）
+    [command addSetJustification:0];
+    [command addText:@"智汇"];
+    //设置水平和垂直单位距离
+    [command addSetHorAndVerMotionUnitsX:7 Y:0];
+    //设置绝对位置
+    [command addSetAbsolutePrintPosition:6];
+    [command addText:@"网络"];
+    [command addSetAbsolutePrintPosition:10];
+    [command addText:@"设备"];
+    [command addPrintAndLineFeed];
+    NSString *content = @"Gprinter";
+    //二维码
+    [command addQRCodeSizewithpL:0 withpH:0 withcn:0 withyfn:0 withn:5];
+    [command addQRCodeSavewithpL:0x0b withpH:0 withcn:0x31 withyfn:0x50 withm:0x30 withData:[content dataUsingEncoding:NSUTF8StringEncoding]];
+    [command addQRCodePrintwithpL:0 withpH:0 withcn:0 withyfn:0 withm:0];
+    [command addPrintAndLineFeed];
+
+    [command addSetBarcodeWidth:2];
+    [command addSetBarcodeHeight:60];
+    [command addSetBarcodeHRPosition:2];
+    [command addCODE128:'B' : @"ABC1234567890"];
+    
+    [command addPrintAndLineFeed];
+    
+    UIImage *image = [UIImage imageNamed:@"gprinter.png"];
+    [command addOriginrastBitImage:image];
+    [command addPrintAndFeedLines:5];
+    return [command getCommand];
 }
 
 -(void)startScane {
     [Manager scanForPeripheralsWithServices:nil options:nil discover:^(CBPeripheral * _Nullable peripheral, NSDictionary<NSString *,id> * _Nullable advertisementData, NSNumber * _Nullable RSSI) {
         if (peripheral.name != nil) {
-            [self.dicts setObject:peripheral forKey:peripheral.identifier.UUIDString];
+            
             NSLog(@"find device -> %@", peripheral.name);
+            [self.scannedPeripherals setObject:peripheral forKey:[[peripheral identifier] UUIDString]];
+            
+            NSDictionary *device = [NSDictionary dictionaryWithObjectsAndKeys:peripheral.identifier.UUIDString,@"address",peripheral.name,@"name",nil,@"type",nil];
+            [_channel invokeMethod:@"ScanResult" arguments:device];
         }
     }];
     
-    NSLog(@"return method -> %d", [[self.dicts allKeys]count]);
-    int a;
-    for( a = 0; a < [[self.dicts allKeys]count]; a = a + 1 ) {
-       CBPeripheral *peripheral = [self.dicts objectForKey:[self.dicts allKeys][a]];
-       NSLog(@"value of a: %@\n", peripheral.name);
-    }
 }
 
 @end
