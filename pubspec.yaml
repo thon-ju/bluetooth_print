@@ -1,6 +1,6 @@
 name: bluetooth_print
 description: A new flutter plugin project connect to bluetooth thermal printer (Gprinter).
-version: 0.1.2
+version: 1.0.0
 author: thon-ju <thon.ju@gmail.com>
 homepage: https://github.com/thon-ju/bluetooth_print
 
