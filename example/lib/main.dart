@@ -153,7 +153,7 @@ class _MyAppState extends State<MyApp> {
                             ByteData data = await rootBundle.load("assets/images/guide3.png");
                             List<int> imageBytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
                             String base64Image = base64Encode(imageBytes);
-                            //list.add(LineText(type: LineText.TYPE_IMAGE, content: base64Image, align: LineText.ALIGN_CENTER, linefeed: 1));
+                            list.add(LineText(type: LineText.TYPE_IMAGE, content: base64Image, align: LineText.ALIGN_CENTER, linefeed: 1));
 
                             await bluetoothPrint.printReceipt(config, list);
                           }:null,

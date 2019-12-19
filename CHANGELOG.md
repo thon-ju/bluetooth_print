@@ -1,3 +1,7 @@
+## 1.0.0
+
+* support ios print label(tsc command) and receipt(esc command).
+
 ## 0.1.2
 
 * support print label(tsc command).

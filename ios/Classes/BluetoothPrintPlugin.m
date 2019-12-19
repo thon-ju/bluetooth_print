@@ -115,7 +115,7 @@
   } else if([@"printLabel" isEqualToString:call.method]) {
      @try {
        NSDictionary *args = [call arguments];
-       [Manager write:[self tscCommand]];
+       [Manager write:[self mapToTscCommand:args]];
        result(nil);
      } @catch(FlutterError *e) {
        result(e);
@@ -130,19 +130,49 @@
   }
 }
 
--(NSData *)tscCommand{
+-(NSData *)mapToTscCommand:(NSDictionary *) args {
+    NSDictionary *config = [args objectForKey:@"config"];
+    NSMutableArray *list = [args objectForKey:@"data"];
+    
+    NSNumber *width = ![config objectForKey:@"width"]?@"48" : [config objectForKey:@"width"];
+    NSNumber *height = ![config objectForKey:@"height"]?@"80" : [config objectForKey:@"height"];
+    NSNumber *gap = ![config objectForKey:@"gap"]?@"2" : [config objectForKey:@"gap"];
+    
     TscCommand *command = [[TscCommand alloc]init];
-    [command addSize:48 :80];
-    [command addGapWithM:2 withN:0];
+    // 设置标签尺寸宽高，按照实际尺寸设置 单位mm
+    [command addSize:[width intValue] :[height intValue]];
+    // 设置标签间隙，按照实际尺寸设置，如果为无间隙纸则设置为0 单位mm
+    [command addGapWithM:[gap intValue] withN:0];
+    // 设置原点坐标
     [command addReference:0 :0];
+    // 撕纸模式开启
     [command addTear:@"ON"];
+    // 开启带Response的打印，用于连续打印
     [command addQueryPrinterStatus:ON];
+    // 清除打印缓冲区
     [command addCls];
-    [command addTextwithX:0 withY:0 withFont:@"TSS24.BF2" withRotation:0 withXscal:1 withYscal:1 withText:@"Smarnet"];
-    [command add1DBarcode:30 :30 :@"CODE128" :100 :1 :0 :2 :2 :@"1234567890"];
-    [command addQRCode:20 :160 :@"L" :5 :@"A" :0 :@"www.tebibo.com"];
-    UIImage *image = [UIImage imageNamed:@"gprinter.png"];
-    [command addBitmapwithX:0 withY:260 withMode:0 withWidth:400 withImage:image];
+    
+    for(NSDictionary *m in list){
+        
+        NSString *type = [m objectForKey:@"type"];
+        NSString *content = [m objectForKey:@"content"];
+        NSNumber *x = ![m objectForKey:@"x"]?@0 : [m objectForKey:@"x"];
+        NSNumber *y = ![m objectForKey:@"y"]?@0 : [m objectForKey:@"y"];
+        
+        if([@"text" isEqualToString:type]){
+            [command addTextwithX:[x intValue] withY:[y intValue] withFont:@"TSS24.BF2" withRotation:0 withXscal:1 withYscal:1 withText:content];
+        }else if([@"barcode" isEqualToString:type]){
+            [command add1DBarcode:[x intValue] :[y intValue] :@"CODE128" :100 :1 :0 :2 :2 :content];
+        }else if([@"qrcode" isEqualToString:type]){
+            [command addQRCode:[x intValue] :[y intValue] :@"L" :5 :@"A" :0 :content];
+        }else if([@"image" isEqualToString:type]){
+            NSData *decodeData = [[NSData alloc] initWithBase64EncodedString:content options:0];
+            UIImage *image = [UIImage imageWithData:decodeData];
+            [command addBitmapwithX:[x intValue] withY:[y intValue] withMode:0 withWidth:300 withImage:image];
+        }
+       
+    }
+    
     [command addPrint:1 :1];
     return [command getCommand];
 }
@@ -159,7 +189,7 @@
         
         NSString *type = [m objectForKey:@"type"];
         NSString *content = [m objectForKey:@"content"];
-        NSNumber *align = ![m objectForKey:@"align"]?@"0" : [m objectForKey:@"align"];
+        NSNumber *align = ![m objectForKey:@"align"]?@0 : [m objectForKey:@"align"];
         NSNumber *size = ![m objectForKey:@"size"]?@4 : [m objectForKey:@"size"];
         NSNumber *weight = ![m objectForKey:@"weight"]?@0 : [m objectForKey:@"weight"];
         NSNumber *width = ![m objectForKey:@"width"]?@0 : [m objectForKey:@"width"];
@@ -200,49 +230,6 @@
     return [command getCommand];
 }
 
--(NSData *)escCommand{
-    EscCommand *command = [[EscCommand alloc]init];
-    [command addInitializePrinter];
-    [command addPrintAndFeedLines:5];
-    //内容居中
-    [command addSetJustification:1];
-    [command addPrintMode: 0|8|16|32];
-    [command addText:@"Print text\n"];
-    [command addPrintAndLineFeed];
-    [command addPrintMode: 0];
-    [command addText:@"Welcome to use Smarnet printer!"];
-    //换行
-    [command addPrintAndLineFeed];
-    //内容居左（默认居左）
-    [command addSetJustification:0];
-    [command addText:@"智汇"];
-    //设置水平和垂直单位距离
-    [command addSetHorAndVerMotionUnitsX:7 Y:0];
-    //设置绝对位置
-    [command addSetAbsolutePrintPosition:6];
-    [command addText:@"网络"];
-    [command addSetAbsolutePrintPosition:10];
-    [command addText:@"设备"];
-    [command addPrintAndLineFeed];
-    NSString *content = @"Gprinter";
-    //二维码
-    [command addQRCodeSizewithpL:0 withpH:0 withcn:0 withyfn:0 withn:5];
-    [command addQRCodeSavewithpL:0x0b withpH:0 withcn:0x31 withyfn:0x50 withm:0x30 withData:[content dataUsingEncoding:NSUTF8StringEncoding]];
-    [command addQRCodePrintwithpL:0 withpH:0 withcn:0 withyfn:0 withm:0];
-    [command addPrintAndLineFeed];
-
-    [command addSetBarcodeWidth:2];
-    [command addSetBarcodeHeight:60];
-    [command addSetBarcodeHRPosition:2];
-    [command addCODE128:'B' : @"ABC1234567890"];
-    
-    [command addPrintAndLineFeed];
-    
-    UIImage *image = [UIImage imageNamed:@"gprinter.png"];
-    [command addOriginrastBitImage:image];
-    [command addPrintAndFeedLines:5];
-    return [command getCommand];
-}
 
 -(void)startScan {
     [Manager scanForPeripheralsWithServices:nil options:nil discover:^(CBPeripheral * _Nullable peripheral, NSDictionary<NSString *,id> * _Nullable advertisementData, NSNumber * _Nullable RSSI) {

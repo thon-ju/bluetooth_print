@@ -49,20 +49,12 @@ public class PrintContent {
                   esc.addSelectJustification(align==0?EscCommand.JUSTIFICATION.LEFT:(align==1?EscCommand.JUSTIFICATION.CENTER:EscCommand.JUSTIFICATION.RIGHT));
 
                   if("text".equals(type)){
-                        if(content == null || content.length() == 0) {
-                              continue;
-                        }
-
                         // 设置为倍高倍宽
                         esc.addSelectPrintModes(EscCommand.FONT.FONTA, emphasized, doubleheight, doublewidth, isUnderline);
                         esc.addText(content);
                         // 取消倍高倍宽
                         esc.addSelectPrintModes(EscCommand.FONT.FONTA, EscCommand.ENABLE.OFF, EscCommand.ENABLE.OFF, EscCommand.ENABLE.OFF, EscCommand.ENABLE.OFF);
                   }else if("barcode".equals(type)){
-                        if(content == null || content.length() == 0) {
-                              continue;
-                        }
-
                         esc.addSelectPrintingPositionForHRICharacters(EscCommand.HRI_POSITION.BELOW);
                         // 设置条码可识别字符位置在条码下方
                         // 设置条码高度为60点
@@ -72,10 +64,6 @@ public class PrintContent {
                         // 打印Code128码
                         esc.addCODE128(esc.genCodeB(content));
                   }else if("qrcode".equals(type)){
-                        if(content == null || content.length() == 0) {
-                              continue;
-                        }
-
                         // 设置纠错等级
                         esc.addSelectErrorCorrectionLevelForQRCode((byte) 0x31);
                         // 设置qrcode模块大小
@@ -85,10 +73,6 @@ public class PrintContent {
                         // 打印QRCode
                         esc.addPrintQRCode();
                   }else if("image".equals(type)){
-                        if(content == null || content.length() == 0) {
-                              continue;
-                        }
-
                         byte[] bytes = Base64.decode(content, Base64.DEFAULT);
                         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                         esc.addRastBitImage(bitmap, 576, 0);
@@ -144,21 +128,14 @@ public class PrintContent {
             // 清除打印缓冲区
             tsc.addCls();
 
-
-            // {type:'text|barcode|qrcode|image', content:'', x:0,y:1}
+            // {type:'text|barcode|qrcode|image', content:'', x:0,y:0}
             for (Map<String,Object> m: list) {
                   String type = (String)m.get("type");
                   String content = (String)m.get("content");
                   int x = (int)(m.get("x")==null?0:m.get("x")); //dpi: 1mm约为8个点
                   int y = (int)(m.get("y")==null?0:m.get("y"));
 
-                  Log.e(TAG,"print line: " + type + " " + content);
-
                   if("text".equals(type)){
-                        if(content == null || content.length() == 0) {
-                              continue;
-                        }
-
                         // 绘制简体中文
                         tsc.addText(x, y, LabelCommand.FONTTYPE.SIMPLIFIED_CHINESE, LabelCommand.ROTATION.ROTATION_0, LabelCommand.FONTMUL.MUL_1, LabelCommand.FONTMUL.MUL_1, content);
                         //打印繁体
@@ -166,22 +143,10 @@ public class PrintContent {
                         //打印韩文
                         //tsc.addUnicodeText(10,60, LabelCommand.FONTTYPE.KOREAN, LabelCommand.ROTATION.ROTATION_0, LabelCommand.FONTMUL.MUL_1, LabelCommand.FONTMUL.MUL_1,"Korean 지아보 하성","EUC_KR");
                   }else if("barcode".equals(type)){
-                        if(content == null || content.length() == 0) {
-                              continue;
-                        }
-
                         tsc.add1DBarcode(x, y, LabelCommand.BARCODETYPE.CODE128, 100, LabelCommand.READABEL.EANBEL, LabelCommand.ROTATION.ROTATION_0, "SMARNET");
                   }else if("qrcode".equals(type)){
-                        if(content == null || content.length() == 0) {
-                              continue;
-                        }
-
                         tsc.addQRCode(x,y, LabelCommand.EEC.LEVEL_L, 5, LabelCommand.ROTATION.ROTATION_0, content);
                   }else if("image".equals(type)){
-                        if(content == null || content.length() == 0) {
-                              continue;
-                        }
-
                         byte[] bytes = Base64.decode(content, Base64.DEFAULT);
                         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                         tsc.addBitmap(x, y, LabelCommand.BITMAP_MODE.OVERWRITE, 300, bitmap);
@@ -194,7 +159,6 @@ public class PrintContent {
             tsc.addSound(2, 100);
             //开启钱箱
             tsc.addCashdrwer(LabelCommand.FOOT.F5, 255, 255);
-
             // 发送数据
             return  tsc.getCommand();
       }
