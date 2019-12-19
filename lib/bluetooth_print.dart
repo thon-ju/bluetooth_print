@@ -124,14 +124,25 @@ class BluetoothPrint {
   Future<dynamic> destroy() => _channel.invokeMethod('destroy');
 
 
-  Future<dynamic> printCustom(Map<String,dynamic> config, List<LineText> data) {
+  Future<dynamic> printReceipt(Map<String,dynamic> config, List<LineText> data) {
     Map<String, Object> args = Map();
     args['config'] = config;
     args['data'] = data.map((m) {
       return m.toJson();
     }).toList();
 
-    _channel.invokeMethod('print', args);
+    _channel.invokeMethod('printReceipt', args);
+    return Future.value(true);
+  }
+
+  Future<dynamic> printLabel(Map<String,dynamic> config, List<LineText> data) {
+    Map<String, Object> args = Map();
+    args['config'] = config;
+    args['data'] = data.map((m) {
+      return m.toJson();
+    }).toList();
+
+    _channel.invokeMethod('printLabel', args);
     return Future.value(true);
   }
 

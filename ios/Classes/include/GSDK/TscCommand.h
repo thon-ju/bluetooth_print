@@ -2,9 +2,6 @@
 //  TscCommand.h
 //  Gprinter
 //
-//  Created by Wind on 2018/6/15.
-//  Copyright (c) 2018年 Smarnet. All rights reserved.
-//
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>

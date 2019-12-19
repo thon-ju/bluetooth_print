@@ -1,6 +1,7 @@
 #import "BluetoothPrintPlugin.h"
 #import "ConnecterManager.h"
 #import "EscCommand.h"
+#import "TscCommand.h"
 
 @interface BluetoothPrintPlugin ()
 @property(nonatomic, retain) NSObject<FlutterPluginRegistrar> *registrar;
@@ -58,7 +59,7 @@
                       NSLog(@"Bluetooth is currently powered off.");
                       break;
                   case CBCentralManagerStatePoweredOn:
-                      [self startScane];
+                      [self startScan];
                       NSLog(@"Bluetooth power on");
                       break;
                   case CBCentralManagerStateUnknown:
@@ -67,7 +68,7 @@
               }
           }];
       } else {
-          [self startScane];
+          [self startScan];
       }
       
     result(nil);
@@ -75,10 +76,16 @@
     [Manager stopScan];
     result(nil);
   } else if([@"connect" isEqualToString:call.method]) {
-     NSString *remoteId = [call arguments];
+    NSDictionary *device = [call arguments];
     @try {
-      CBPeripheral *peripheral = [_scannedPeripherals objectForKey:remoteId];
-      [Manager connectPeripheral:peripheral options:nil];
+      NSLog(@"connect device begin -> %@", [device objectForKey:@"name"]);
+      CBPeripheral *peripheral = [_scannedPeripherals objectForKey:[device objectForKey:@"address"]];
+        
+      self.state = ^(ConnectState state) {
+        [self updateConnectState:state];
+      };
+      [Manager connectPeripheral:peripheral options:nil timeout:2 connectBlack: self.state];
+      
       result(nil);
     } @catch(FlutterError *e) {
       result(e);
@@ -93,12 +100,49 @@
   } else if([@"print" isEqualToString:call.method]) {
      @try {
        
-       [Manager write:[self escCommand]];
        result(nil);
      } @catch(FlutterError *e) {
        result(e);
      }
-   }
+  } else if([@"printReceipt" isEqualToString:call.method]) {
+       @try {
+         [Manager write:[self escCommand]];
+         result(nil);
+       } @catch(FlutterError *e) {
+         result(e);
+       }
+  } else if([@"printLabel" isEqualToString:call.method]) {
+     @try {
+       [Manager write:[self tscCommand]];
+       result(nil);
+     } @catch(FlutterError *e) {
+       result(e);
+     }
+  }else if([@"printTest" isEqualToString:call.method]) {
+     @try {
+       
+       result(nil);
+     } @catch(FlutterError *e) {
+       result(e);
+     }
+  }
+}
+
+-(NSData *)tscCommand{
+    TscCommand *command = [[TscCommand alloc]init];
+    [command addSize:48 :80];
+    [command addGapWithM:2 withN:0];
+    [command addReference:0 :0];
+    [command addTear:@"ON"];
+    [command addQueryPrinterStatus:ON];
+    [command addCls];
+    [command addTextwithX:0 withY:0 withFont:@"TSS24.BF2" withRotation:0 withXscal:1 withYscal:1 withText:@"Smarnet"];
+    [command add1DBarcode:30 :30 :@"CODE128" :100 :1 :0 :2 :2 :@"1234567890"];
+    [command addQRCode:20 :160 :@"L" :5 :@"A" :0 :@"www.tebibo.com"];
+    UIImage *image = [UIImage imageNamed:@"gprinter.png"];
+    [command addBitmapwithX:0 withY:260 withMode:0 withWidth:400 withImage:image];
+    [command addPrint:1 :1];
+    return [command getCommand];
 }
 
 -(NSData *)escCommand{
@@ -145,7 +189,7 @@
     return [command getCommand];
 }
 
--(void)startScane {
+-(void)startScan {
     [Manager scanForPeripheralsWithServices:nil options:nil discover:^(CBPeripheral * _Nullable peripheral, NSDictionary<NSString *,id> * _Nullable advertisementData, NSNumber * _Nullable RSSI) {
         if (peripheral.name != nil) {
             
@@ -157,6 +201,39 @@
         }
     }];
     
+}
+
+-(void)updateConnectState:(ConnectState)state {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSNumber *ret = @0;
+        switch (state) {
+            case CONNECT_STATE_CONNECTING:
+                NSLog(@"status -> %@", @"连接状态：连接中....");
+                ret = @0;
+                break;
+            case CONNECT_STATE_CONNECTED:
+                NSLog(@"status -> %@", @"连接状态：连接成功");
+                ret = @1;
+                break;
+            case CONNECT_STATE_FAILT:
+                NSLog(@"status -> %@", @"连接状态：连接失败");
+                ret = @0;
+                break;
+            case CONNECT_STATE_DISCONNECT:
+                NSLog(@"status -> %@", @"连接状态：断开连接");
+                ret = @0;
+                break;
+            default:
+                NSLog(@"status -> %@", @"连接状态：连接超时");
+                ret = @0;
+                break;
+        }
+        
+         NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:ret,@"id",nil];
+        if(_stateStreamHandler.sink != nil) {
+          self.stateStreamHandler.sink([dict objectForKey:@"id"]);
+        }
+    });
 }
 
 @end

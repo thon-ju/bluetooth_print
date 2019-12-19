@@ -151,7 +151,7 @@ class _MyAppState extends State<MyApp> {
                             List<int> imageBytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
                             String base64Image = base64Encode(imageBytes);
                             list.add(LineText(type: LineText.TYPE_IMAGE, content: base64Image, align: LineText.ALIGN_CENTER, linefeed: 1));
-                            await bluetoothPrint.printCustom(config, list);
+                            await bluetoothPrint.printReceipt(config, list);
                           }:null,
                         ),
                         OutlineButton(
@@ -175,8 +175,8 @@ class _MyAppState extends State<MyApp> {
                             String base64Image = base64Encode(imageBytes);
                             list1.add(LineText(type: LineText.TYPE_IMAGE, x:10, y:10, content: base64Image,));
 
-                            await bluetoothPrint.printCustom(config, list);
-                            await bluetoothPrint.printCustom(config, list1);
+                            await bluetoothPrint.printLabel(config, list);
+                            await bluetoothPrint.printLabel(config, list1);
                           }:null,
                         ),
                         OutlineButton(

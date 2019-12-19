@@ -2,9 +2,6 @@
 //  EscCommand.h
 //  Gprinter
 //
-//  Created by Wind on 14/12/22.
-//  Copyright (c) 2014年 JiaBo. All rights reserved.
-//
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>

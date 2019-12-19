@@ -14,13 +14,14 @@ ios features maybe finished before this month end(eg. 2019/12/30)
 |                         |      Android       |         iOS          |             Description            |
 | :---------------        | :----------------: | :------------------: |  :-------------------------------- |
 | scan                    | :white_check_mark: |  :white_check_mark:  | Starts a scan for Bluetooth Low Energy devices. |
-| connect                 | :white_check_mark: |                      | Establishes a connection to the device. |
-| disconnect              | :white_check_mark: |                      | Cancels an active or pending connection to the device. |
-| print test message      | :white_check_mark: |                      | print device test message. |
+| connect                 | :white_check_mark: |  :white_check_mark:  | Establishes a connection to the device. |
+| disconnect              | :white_check_mark: |  :white_check_mark:  | Cancels an active or pending connection to the device. |
+| state                   | :white_check_mark: |  :white_check_mark:  | Stream of state changes for the Bluetooth Device. |
+| print test message      | :white_check_mark: |  :white_check_mark:  | print device test message. |
 | print text              | :white_check_mark: |                      | print custom text, support layout. |
 | print image             | :white_check_mark: |                      | print image. |
 | print qrcode            | :white_check_mark: |                      | print qrcode,support change size. |
-| display connect status  | :white_check_mark: |                      | Stream of state changes for the Bluetooth Device. |
+
 
 ## Usage
 
@@ -113,6 +114,10 @@ await bluetoothPrint.disconnect();
 #### error:'State restoration of CBCentralManager is only allowed for applications that have specified the "bluetooth-central" background mode'    
 info.plist add:
 ```
+<key>NSBluetoothAlwaysUsageDescription</key>
+<string>Allow App use bluetooth?</string>
+<key>NSBluetoothPeripheralUsageDescription</key>
+<string>Allow App use bluetooth?</string>
 <key>UIBackgroundModes</key>
 <array>
     <string>bluetooth-central</string>

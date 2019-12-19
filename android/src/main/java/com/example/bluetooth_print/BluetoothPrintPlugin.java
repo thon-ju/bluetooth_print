@@ -119,6 +119,12 @@ public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissio
       case "print":
         print(result, args);
         break;
+      case "printReceipt":
+        print(result, args);
+        break;
+      case "printLabel":
+        print(result, args);
+        break;
       case "printTest":
         printTest(result);
         break;
