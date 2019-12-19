@@ -1,3 +1,8 @@
+## 1.0.1
+
+* opt log.
+
+
 ## 1.0.0
 
 * support ios print label(tsc command) and receipt(esc command).

@@ -207,22 +207,17 @@ public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissio
   private ScanCallback mScanCallback = new ScanCallback() {
     @Override
     public void onScanResult(int callbackType, ScanResult result) {
-      Log.d(TAG,"start scan 21 main start 3");
-
       BluetoothDevice device = result.getDevice();
       if(device != null && device.getName() != null){
         invokeMethodUIThread("ScanResult", device);
       }
-
     }
   };
 
   private void startScan() throws IllegalStateException {
-    Log.d(TAG,"start scan 21 main start");
     BluetoothLeScanner scanner = mBluetoothAdapter.getBluetoothLeScanner();
     if(scanner == null) throw new IllegalStateException("getBluetoothLeScanner() is null. Is the Adapter on?");
 
-    Log.d(TAG,"start scan 21 main start 1");
     // 0:lowPower 1:balanced 2:lowLatency -1:opportunistic
     ScanSettings settings = new ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build();
     scanner.startScan(null, settings, mScanCallback);
