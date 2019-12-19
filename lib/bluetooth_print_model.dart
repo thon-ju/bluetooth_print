@@ -36,14 +36,14 @@ class LineText {
   static const String TYPE_BARCODE = 'barcode';
   static const String TYPE_QRCODE = 'qrcode';
   static const String TYPE_IMAGE = 'image';
-  static const String ALIGN_LEFT = 'left';
-  static const String ALIGN_CENTER = 'center';
-  static const String ALIGN_RIGHT = 'right';
+  static const int ALIGN_LEFT = 0;
+  static const int ALIGN_CENTER = 1;
+  static const int ALIGN_RIGHT = 2;
 
   final String type;
   final String content;
   final int size;
-  final String align;
+  final int align;
   final int weight;
   final int width;
   final int height;

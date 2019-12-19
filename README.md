@@ -18,9 +18,10 @@ ios features maybe finished before this month end(eg. 2019/12/30)
 | disconnect              | :white_check_mark: |  :white_check_mark:  | Cancels an active or pending connection to the device. |
 | state                   | :white_check_mark: |  :white_check_mark:  | Stream of state changes for the Bluetooth Device. |
 | print test message      | :white_check_mark: |  :white_check_mark:  | print device test message. |
-| print text              | :white_check_mark: |                      | print custom text, support layout. |
-| print image             | :white_check_mark: |                      | print image. |
-| print qrcode            | :white_check_mark: |                      | print qrcode,support change size. |
+| print text              | :white_check_mark: |  :white_check_mark:  | print custom text, support layout. |
+| print image             | :white_check_mark: |  :white_check_mark:  | print image. |
+| print qrcode            | :white_check_mark: |  :white_check_mark:  | print qrcode,support change size. |
+| print barcode           | :white_check_mark: |  :white_check_mark:  | print barcode |
 
 
 ## Usage
@@ -55,24 +56,24 @@ bluetoothPrint.startScan(timeout: Duration(seconds: 4));
 
 // get devices
 StreamBuilder<List<BluetoothDevice>>(
-                    stream: bluetoothPrint.scanResults,
-                    initialData: [],
-                    builder: (c, snapshot) => Column(
-                      children: snapshot.data.map((d) => ListTile(
-                        title: Text(d.name??''),
-                        subtitle: Text(d.address),
-                        onTap: () async {
-                          setState(() {
-                            _device = d;
-                          });
-                        },
-                        trailing: _device!=null && _device.address == d.address?Icon(
-                          Icons.check,
-                          color: Colors.green,
-                        ):null,
-                      )).toList(),
-                    ),
-                  ),
+    stream: bluetoothPrint.scanResults,
+    initialData: [],
+    builder: (c, snapshot) => Column(
+      children: snapshot.data.map((d) => ListTile(
+        title: Text(d.name??''),
+        subtitle: Text(d.address),
+        onTap: () async {
+          setState(() {
+            _device = d;
+          });
+        },
+        trailing: _device!=null && _device.address == d.address?Icon(
+          Icons.check,
+          color: Colors.green,
+        ):null,
+      )).toList(),
+    ),
+  ),
 ```
 
 ### connect

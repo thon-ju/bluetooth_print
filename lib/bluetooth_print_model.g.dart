@@ -35,7 +35,7 @@ LineText _$LineTextFromJson(Map<String, dynamic> json) {
     type: json['type'] as String,
     content: json['content'] as String,
     size: json['size'] as int,
-    align: json['align'] as String,
+    align: json['align'] as int,
     weight: json['weight'] as int,
     width: json['width'] as int,
     height: json['height'] as int,

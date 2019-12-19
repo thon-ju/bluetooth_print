@@ -106,13 +106,15 @@
      }
   } else if([@"printReceipt" isEqualToString:call.method]) {
        @try {
-         [Manager write:[self escCommand]];
+         NSDictionary *args = [call arguments];
+         [Manager write:[self mapToEscCommand:args]];
          result(nil);
        } @catch(FlutterError *e) {
          result(e);
        }
   } else if([@"printLabel" isEqualToString:call.method]) {
      @try {
+       NSDictionary *args = [call arguments];
        [Manager write:[self tscCommand]];
        result(nil);
      } @catch(FlutterError *e) {
@@ -142,6 +144,59 @@
     UIImage *image = [UIImage imageNamed:@"gprinter.png"];
     [command addBitmapwithX:0 withY:260 withMode:0 withWidth:400 withImage:image];
     [command addPrint:1 :1];
+    return [command getCommand];
+}
+
+-(NSData *)mapToEscCommand:(NSDictionary *) args {
+    NSDictionary *config = [args objectForKey:@"config"];
+    NSMutableArray *list = [args objectForKey:@"data"];
+    
+    EscCommand *command = [[EscCommand alloc]init];
+    [command addInitializePrinter];
+    [command addPrintAndFeedLines:3];
+
+    for(NSDictionary *m in list){
+        
+        NSString *type = [m objectForKey:@"type"];
+        NSString *content = [m objectForKey:@"content"];
+        NSNumber *align = ![m objectForKey:@"align"]?@"0" : [m objectForKey:@"align"];
+        NSNumber *size = ![m objectForKey:@"size"]?@4 : [m objectForKey:@"size"];
+        NSNumber *weight = ![m objectForKey:@"weight"]?@0 : [m objectForKey:@"weight"];
+        NSNumber *width = ![m objectForKey:@"width"]?@0 : [m objectForKey:@"width"];
+        NSNumber *height = ![m objectForKey:@"height"]?@0 : [m objectForKey:@"height"];
+        NSNumber *underline = ![m objectForKey:@"underline"]?@0 : [m objectForKey:@"underline"];
+        NSNumber *linefeed = ![m objectForKey:@"linefeed"]?@0 : [m objectForKey:@"linefeed"];
+        
+        //内容居左（默认居左）
+        [command addSetJustification:[align intValue]];
+        
+        if([@"text" isEqualToString:type]){
+            [command addPrintMode: [weight intValue] ==0?0:0|8|16|32];
+            [command addText:content];
+            [command addPrintMode: 0];
+        }else if([@"barcode" isEqualToString:type]){
+            [command addSetBarcodeWidth:2];
+            [command addSetBarcodeHeight:60];
+            [command addSetBarcodeHRPosition:2];
+            [command addCODE128:'B' : content];
+        }else if([@"qrcode" isEqualToString:type]){
+            //二维码
+            [command addQRCodeSizewithpL:0 withpH:0 withcn:0 withyfn:0 withn:[size intValue]];
+            [command addQRCodeSavewithpL:0x0b withpH:0 withcn:0x31 withyfn:0x50 withm:0x30 withData:[content dataUsingEncoding:NSUTF8StringEncoding]];
+            [command addQRCodePrintwithpL:0 withpH:0 withcn:0 withyfn:0 withm:0];
+        }else if([@"image" isEqualToString:type]){
+            NSData *decodeData = [[NSData alloc] initWithBase64EncodedString:content options:0];
+            UIImage *image = [UIImage imageWithData:decodeData];
+            [command addOriginrastBitImage:image width:576];
+        }
+        
+        if([linefeed isEqualToNumber:@1]){
+            [command addPrintAndLineFeed];
+        }
+       
+    }
+    
+    [command addPrintAndFeedLines:4];
     return [command getCommand];
 }
 
