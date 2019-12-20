@@ -4,19 +4,25 @@
 Pod::Spec.new do |s|
   s.name             = 'bluetooth_print'
   s.version          = '0.0.1'
-  s.summary          = 'A new flutter plugin project.'
+  s.summary          = 'A new flutter plugin for bluetooth printer.'
   s.description      = <<-DESC
 A new flutter plugin project.
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'https://github.com/thon-ju/bluetooth_print'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'email@example.com' }
+  s.author           = { 'thon-ju' => 'thon.ju@gmail.com' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
-  s.public_header_files = 'Classes/**/*.h'
-  s.vendored_libraries = 'Classes/GSDK.a'
+  s.public_header_files = 'Classes/**/*.h', 'include/**/*.h'
+  s.static_framework = true
   s.dependency 'Flutter'
 
-  s.ios.deployment_target = '8.0'
+  # 引入Classes文件夹下所有的*.a库
+  s.frameworks = ["SystemConfiguration", "CoreTelephony","WebKit"]
+  s.libraries = ["z", "sqlite3.0", "c++"]
+  s.preserve_paths = 'Lib/*.a'
+  s.vendored_libraries = '**/*.a'
+
+  #s.ios.deployment_target = '8.0'
 end
 

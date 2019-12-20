@@ -3,7 +3,6 @@ package com.example.bluetooth_print;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
-import android.util.Log;
 import com.gprinter.command.CpclCommand;
 import com.gprinter.command.EscCommand;
 import com.gprinter.command.LabelCommand;
@@ -37,8 +36,6 @@ public class PrintContent {
                   int height = (int)(m.get("height")==null?0:m.get("height"));
                   int underline = (int)(m.get("underline")==null?0:m.get("underline"));
                   int linefeed = (int)(m.get("linefeed")==null?0:m.get("linefeed"));
-
-                  Log.e(TAG,"print line: " + type + " " + content);
 
                   EscCommand.ENABLE emphasized = weight==0?EscCommand.ENABLE.OFF:EscCommand.ENABLE.ON;
                   EscCommand.ENABLE doublewidth = width==0?EscCommand.ENABLE.OFF:EscCommand.ENABLE.ON;
