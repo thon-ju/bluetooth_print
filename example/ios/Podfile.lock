@@ -19,7 +19,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider/ios"
 
 SPEC CHECKSUMS:
-  bluetooth_print: 81f66f4e746284770012259655a626d917814bc8
+  bluetooth_print: 9f90a240d03f9b660cc31af5dfa888bef8bcbc8d
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   path_provider: fb74bd0465e96b594bb3b5088ee4a4e7bb1f2a9d
 
