@@ -1,3 +1,8 @@
+## 1.1.
+
+* opt ios config.
+
+
 ## 1.0.1
 
 * opt log.
