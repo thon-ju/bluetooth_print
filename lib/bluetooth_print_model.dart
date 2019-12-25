@@ -18,19 +18,18 @@ class BluetoothDevice {
 
 @JsonSerializable(includeIfNull: false)
 class LineText {
-  LineText({
-    this.type, //text,barcode,qrcode,image(base64 string)
-    this.content,
-    this.size = 0,
-    this.align = ALIGN_LEFT,
-    this.weight = 0, //0,1
-    this.width = 0, //0,1
-    this.height = 0, //0,1
-    this.underline = 0, //0,1
-    this.linefeed = 0, //0,1
-    this.x = 0,
-    this.y = 0
-  });
+  LineText(
+      {this.type, //text,barcode,qrcode,image(base64 string)
+      this.content,
+      this.size = 0,
+      this.align = ALIGN_LEFT,
+      this.weight = 0, //0,1
+      this.width = 0, //0,1
+      this.height = 0, //0,1
+      this.underline = 0, //0,1
+      this.linefeed = 0, //0,1
+      this.x = 0,
+      this.y = 0});
 
   static const String TYPE_TEXT = 'text';
   static const String TYPE_BARCODE = 'barcode';
