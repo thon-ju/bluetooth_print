@@ -154,7 +154,13 @@ await bluetoothPrint.disconnect();
 
 ## Troubleshooting
 #### ios import third party library
-[Please Read link: https://www.jianshu.com/p/a8a05ab9b895](https://www.jianshu.com/p/a8a05ab9b895) 
+[Please Read link: https://stackoverflow.com/questions/19189463/cocoapods-podspec-issue) 
+*.podspec add:
+```
+# .a filename must begin with lib, eg. 'libXXX.a'
+s.vendored_libraries = '**/*.a'
+```
+
 
 #### error:'State restoration of CBCentralManager is only allowed for applications that have specified the "bluetooth-central" background mode'    
 info.plist add:
