@@ -154,7 +154,7 @@ await bluetoothPrint.disconnect();
 
 ## Troubleshooting
 #### ios import third party library
-[Please Read link: https://stackoverflow.com/questions/19189463/cocoapods-podspec-issue) 
+[Please Read link: https://stackoverflow.com/questions/19189463/cocoapods-podspec-issue)         
 *.podspec add:
 ```
 # .a filename must begin with lib, eg. 'libXXX.a'
