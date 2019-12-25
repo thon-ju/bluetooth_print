@@ -61,7 +61,7 @@ class BluetoothPrint {
     final killStreams = <Stream>[];
     killStreams.add(_stopScanPill);
     if (timeout != null) {
-      killStreams.add(Observable.timer(null, timeout));
+      killStreams.add(Rx.timer(null, timeout));
     }
 
     // Clear scan results list
@@ -76,10 +76,8 @@ class BluetoothPrint {
       throw e;
     }
 
-    yield* Observable(BluetoothPrint.instance._methodStream
-        .where((m) => m.method == "ScanResult")
-        .map((m) => m.arguments))
-        .takeUntil(Observable.merge(killStreams))
+    yield* BluetoothPrint.instance._methodStream.where((m) => m.method == "ScanResult").map((m) => m.arguments)
+        .takeUntil(Rx.merge(killStreams))
         .doOnDone(stopScan)
         .map((map) {
               final device = BluetoothDevice.fromJson(Map<String, dynamic>.from(map));
