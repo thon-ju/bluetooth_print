@@ -1,4 +1,8 @@
-## 1.1.
+## 1.2.0
+
+* fix ios library auto import bug.
+
+## 1.1.0
 
 * opt ios config.
 
