@@ -163,6 +163,10 @@ await bluetoothPrint.disconnect();
 s.vendored_libraries = '**/*.a'
 ```
 
+## FAQ Support
+you can join this [QQ](https://im.qq.com/index.shtml) group, feedback your problem  
+<img src="assets/bluetooth_print.png">
+
 
 #### error:'State restoration of CBCentralManager is only allowed for applications that have specified the "bluetooth-central" background mode'    
 info.plist add:
