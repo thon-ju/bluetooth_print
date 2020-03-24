@@ -28,7 +28,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.2.0"
+    version: "0.0.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -109,13 +109,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.8"
-  oktoast:
-    dependency: "direct main"
-    description:
-      name: oktoast
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.2.1"
   path:
     dependency: transitive
     description:
@@ -123,13 +116,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.6.4"
-  path_provider:
-    dependency: "direct main"
-    description:
-      name: path_provider
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.5.0"
   pedantic:
     dependency: transitive
     description:
@@ -144,13 +130,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.4.0"
-  platform:
-    dependency: transitive
-    description:
-      name: platform
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.2.1"
   quiver:
     dependency: transitive
     description:
@@ -235,4 +214,3 @@ packages:
     version: "3.5.0"
 sdks:
   dart: ">=2.6.0 <3.0.0"
-  flutter: ">=1.9.1+hotfix.5 <2.0.0"

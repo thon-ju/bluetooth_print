@@ -2,27 +2,21 @@ PODS:
   - bluetooth_print (0.0.1):
     - Flutter
   - Flutter (1.0.0)
-  - path_provider (0.0.1):
-    - Flutter
 
 DEPENDENCIES:
   - bluetooth_print (from `.symlinks/plugins/bluetooth_print/ios`)
-  - Flutter (from `.symlinks/flutter/ios`)
-  - path_provider (from `.symlinks/plugins/path_provider/ios`)
+  - Flutter (from `Flutter`)
 
 EXTERNAL SOURCES:
   bluetooth_print:
     :path: ".symlinks/plugins/bluetooth_print/ios"
   Flutter:
-    :path: ".symlinks/flutter/ios"
-  path_provider:
-    :path: ".symlinks/plugins/path_provider/ios"
+    :path: Flutter
 
 SPEC CHECKSUMS:
-  bluetooth_print: 211fbcc327dbeabe8256fd92cf2515844005ad75
+  bluetooth_print: da8f47e8881a0b1f0fd8d73cd6fa84c9bd41ac28
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
-  path_provider: fb74bd0465e96b594bb3b5088ee4a4e7bb1f2a9d
 
-PODFILE CHECKSUM: 7fb83752f59ead6285236625b82473f90b1cb932
+PODFILE CHECKSUM: 3dbe063e9c90a5d7c9e4e76e70a821b9e2c1d271
 
-COCOAPODS: 1.8.4
+COCOAPODS: 1.7.5
