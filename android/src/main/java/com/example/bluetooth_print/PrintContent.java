@@ -172,4 +172,15 @@ public class PrintContent {
             return datas;
       }
 
+      public static byte[] convertVectorByteToBytes(Vector<Byte> data) {
+            byte[] sendData = new byte[data.size()];
+            if (data.size() > 0) {
+                  for(int i = 0; i < data.size(); ++i) {
+                        sendData[i] = (Byte)data.get(i);
+                  }
+            }
+
+            return sendData;
+      }
+
 }
