@@ -1,5 +1,6 @@
 package com.example.bluetooth_print;
 
+import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -16,6 +17,8 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import com.gprinter.command.FactoryCommand;
 import com.qs.helper.printer.Device;
 import com.qs.helper.printer.PrintService;
@@ -184,6 +187,16 @@ public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissio
         break;
       case "startScan":
       {
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+          ActivityCompat.requestPermissions(
+                  activity,
+                  new String[] {Manifest.permission.ACCESS_COARSE_LOCATION},
+                  REQUEST_COARSE_LOCATION_PERMISSIONS);
+          pendingCall = call;
+          pendingResult = result;
+          break;
+        }
         startScan(call, result);
         break;
       }
