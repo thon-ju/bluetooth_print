@@ -465,7 +465,7 @@ public class BlueToothService {
         public void write(byte[] buffer) {
             try {
                 this.mmOutStream.write(buffer);
-                Log.w("BTPWRITE", new String(buffer));
+                Log.w("BluetoothPrintPlugin", new String(buffer));
                 BlueToothService.this.mHandler.obtainMessage(3, -1, -1, buffer).sendToTarget();
             } catch (IOException var3) {
             }

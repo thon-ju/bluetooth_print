@@ -16,6 +16,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Message;
+import android.os.StrictMode;
 import android.util.Log;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -72,6 +73,9 @@ public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissio
   }
 
   BluetoothPrintPlugin(Registrar r){
+    // 调用严苛模式
+    StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+    StrictMode.setThreadPolicy(policy);
 
     mhandler = new Handler() {
       public void handleMessage(Message msg) {
@@ -402,7 +406,9 @@ public class BluetoothPrintPlugin implements MethodCallHandler, RequestPermissio
 
       Log.d(TAG, "print esc begin");
 
-      pl.write(PrintContent.convertVectorByteToBytes(PrintContent.mapToReceipt(config, list)));
+//      pl.write(PrintContent.convertVectorByteToBytes(PrintContent.mapToReceipt(config, list)));
+      pl.printText("test 你好 \n");
+      pl.write(new byte[] {  0x0c });
     }else{
       result.error("please add config or data", "", null);
     }
