@@ -11,6 +11,7 @@ BluetoothPrint is a bluetooth plugin for [Flutter](http://www.flutter.io), a new
 [ ] more print examples
 
 ### verison
+3.0.0（handle all issues before 2020-09-08）      
 2.0.0（flutter 1.12）       
 1.2.0（flutter 1.9） 
 
