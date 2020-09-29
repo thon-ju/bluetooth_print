@@ -5,7 +5,7 @@ author: thon-ju <thon.ju@gmail.com>
 homepage: https://github.com/thon-ju/bluetooth_print
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.9.2 <3.0.0"
 
 dependencies:
   flutter:

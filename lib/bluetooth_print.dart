@@ -137,6 +137,7 @@ class BluetoothPrint {
     args['data'] = data.map((m) {
       return m.toJson();
     }).toList();
+    print('got here...'+args.toString());
 
     _channel.invokeMethod('printReceipt', args);
     return Future.value(true);
