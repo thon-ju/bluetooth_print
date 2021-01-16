@@ -145,10 +145,6 @@ class _MyAppState extends State<MyApp> {
                             list.add(LineText(type: LineText.TYPE_TEXT, content: 'this is conent left', weight: 0, align: LineText.ALIGN_LEFT,linefeed: 1));
                             list.add(LineText(type: LineText.TYPE_TEXT, content: 'this is conent right', align: LineText.ALIGN_RIGHT,linefeed: 1));
                             list.add(LineText(linefeed: 1));
-//                            list.add(LineText(type: LineText.TYPE_BARCODE, content: 'A12312112', size:10, align: LineText.ALIGN_CENTER, linefeed: 1));
-//                            list.add(LineText(linefeed: 1));
-//                            list.add(LineText(type: LineText.TYPE_QRCODE, content: 'qrcode i', size:10, align: LineText.ALIGN_CENTER, linefeed: 1));
-//                            list.add(LineText(linefeed: 1));
 
                             ByteData data = await rootBundle.load("assets/images/bluetooth_print.png");
                             List<int> imageBytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
