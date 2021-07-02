@@ -114,7 +114,7 @@ class _MyAppState extends State<MyApp> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            OutlineButton(
+                            OutlinedButton(
                               child: Text('connect'),
                               onPressed:  _connected?null:() async {
                                 if(_device!=null && _device.address !=null){
@@ -128,7 +128,7 @@ class _MyAppState extends State<MyApp> {
                               },
                             ),
                             SizedBox(width: 10.0),
-                            OutlineButton(
+                            OutlinedButton(
                               child: Text('disconnect'),
                               onPressed:  _connected?() async {
                                 await bluetoothPrint.disconnect();
@@ -136,11 +136,11 @@ class _MyAppState extends State<MyApp> {
                             ),
                           ],
                         ),
-                        OutlineButton(
+                        OutlinedButton(
                           child: Text('print receipt(esc)'),
                           onPressed:  _connected?() async {
                             Map<String, dynamic> config = Map();
-                            List<LineText> list = List();
+                            List<LineText> list = [];
                             list.add(LineText(type: LineText.TYPE_TEXT, content: 'A Title', weight: 1, align: LineText.ALIGN_CENTER,linefeed: 1));
                             list.add(LineText(type: LineText.TYPE_TEXT, content: 'this is conent left', weight: 0, align: LineText.ALIGN_LEFT,linefeed: 1));
                             list.add(LineText(type: LineText.TYPE_TEXT, content: 'this is conent right', align: LineText.ALIGN_RIGHT,linefeed: 1));
@@ -154,7 +154,7 @@ class _MyAppState extends State<MyApp> {
                             await bluetoothPrint.printReceipt(config, list);
                           }:null,
                         ),
-                        OutlineButton(
+                        OutlinedButton(
                           child: Text('print label(tsc)'),
                           onPressed:  _connected?() async {
                             Map<String, dynamic> config = Map();
@@ -163,13 +163,13 @@ class _MyAppState extends State<MyApp> {
                             config['gap'] = 2; // 标签间隔，单位mm
 
                             // x、y坐标位置，单位dpi，1mm=8dpi
-                            List<LineText> list = List();
+                            List<LineText> list = [];
                             list.add(LineText(type: LineText.TYPE_TEXT, x:10, y:10, content: 'A Title'));
                             list.add(LineText(type: LineText.TYPE_TEXT, x:10, y:40, content: 'this is content'));
                             list.add(LineText(type: LineText.TYPE_QRCODE, x:10, y:70, content: 'qrcode i\n'));
                             list.add(LineText(type: LineText.TYPE_BARCODE, x:10, y:190, content: 'qrcode i\n'));
 
-                            List<LineText> list1 = List();
+                            List<LineText> list1 = [];
                             ByteData data = await rootBundle.load("assets/images/guide3.png");
                             List<int> imageBytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
                             String base64Image = base64Encode(imageBytes);
@@ -179,7 +179,7 @@ class _MyAppState extends State<MyApp> {
                             await bluetoothPrint.printLabel(config, list1);
                           }:null,
                         ),
-                        OutlineButton(
+                        OutlinedButton(
                           child: Text('print selftest'),
                           onPressed:  _connected?() async {
                             await bluetoothPrint.printTest();
