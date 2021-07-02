@@ -6,10 +6,10 @@ part 'bluetooth_print_model.g.dart';
 class BluetoothDevice {
   BluetoothDevice();
 
-  String name;
-  String address;
-  int type = 0;
-  bool connected = false;
+  String? name;
+  String? address;
+  int? type = 0;
+  bool? connected = false;
 
   factory BluetoothDevice.fromJson(Map<String, dynamic> json) =>
       _$BluetoothDeviceFromJson(json);
@@ -39,17 +39,17 @@ class LineText {
   static const int ALIGN_CENTER = 1;
   static const int ALIGN_RIGHT = 2;
 
-  final String type;
-  final String content;
-  final int size;
-  final int align;
-  final int weight;
-  final int width;
-  final int height;
-  final int underline;
-  final int linefeed;
-  final int x;
-  final int y;
+  final String? type;
+  final String? content;
+  final int? size;
+  final int? align;
+  final int? weight;
+  final int? width;
+  final int? height;
+  final int? underline;
+  final int? linefeed;
+  final int? x;
+  final int? y;
 
   factory LineText.fromJson(Map<String, dynamic> json) =>
       _$LineTextFromJson(json);
