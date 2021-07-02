@@ -1,10 +1,10 @@
 name: bluetooth_print_example
 description: Demonstrates how to use the bluetooth_print plugin.
 publish_to: 'none'
-version: 1.0.0+1
+version: 3.0.0+1
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.10.0 <3.0.0"
 
 dependencies:
   flutter:
