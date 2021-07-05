@@ -251,7 +251,7 @@ public class DeviceConnFactoryManager {
     /**
      * 关闭端口
      */
-    public void closePort(int id) {
+    public void closePort() {
         if (this.mPort != null) {
             if(reader!=null) {
                 reader.cancel();
@@ -263,6 +263,7 @@ public class DeviceConnFactoryManager {
                 isOpenPort = false;
                 currentPrinterCommand = null;
             }
+
         }
 
     }
@@ -289,7 +290,7 @@ public class DeviceConnFactoryManager {
         for (DeviceConnFactoryManager deviceConnFactoryManager : deviceConnFactoryManagers) {
             if (deviceConnFactoryManager != null) {
                 Log.e(TAG, "cloaseAllPort() id -> " + deviceConnFactoryManager.id);
-                deviceConnFactoryManager.closePort(deviceConnFactoryManager.id);
+                deviceConnFactoryManager.closePort();
                 deviceConnFactoryManagers[deviceConnFactoryManager.id] = null;
             }
         }
@@ -391,17 +392,14 @@ public class DeviceConnFactoryManager {
         }
     }
     public void sendByteDataImmediately(final byte [] data) {
-        if (this.mPort == null) {
-            return;
-        }else {
+        if (this.mPort != null) {
             Vector<Byte> datas=new Vector<Byte>();
             for(int i = 0; i < data.length; ++i) {
                 datas.add(Byte.valueOf(data[i]));
             }
             try {
                 this.mPort.writeDataImmediately(datas, 0, datas.size());
-            } catch (IOException e) {//异常中断发送
-//                e.printStackTrace();
+            } catch (IOException e) {//异常中断
                 mHandler.obtainMessage(Constant.abnormal_Disconnection).sendToTarget();
             }
         }
@@ -415,7 +413,7 @@ public class DeviceConnFactoryManager {
         try {
             r =  this.mPort.readData(buffer);
         } catch (IOException e) {
-
+            closePort();
         }
 
         return  r;
@@ -490,7 +488,7 @@ public class DeviceConnFactoryManager {
         @Override
         public void run() {
             try {
-                while (isRun) {
+                while (isRun && mPort != null) {
                     //读取打印机返回信息,打印机没有返回纸返回-1
                     Log.e(TAG,"wait read ");
                     int len = readDataImmediately(buffer);
@@ -507,7 +505,7 @@ public class DeviceConnFactoryManager {
                 }
             } catch (Exception e) {//异常断开
                 if (deviceConnFactoryManagers[id] != null) {
-                    closePort(id);
+                    closePort();
                     mHandler.obtainMessage(Constant.abnormal_Disconnection).sendToTarget();
                 }
             }
