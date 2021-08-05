@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:rxdart/rxdart.dart';
@@ -130,6 +131,14 @@ class BluetoothPrint {
       _channel.invokeMethod('connect', device.toJson());
 
   Future<dynamic> disconnect() => _channel.invokeMethod('disconnect');
+
+  Future<dynamic> rawBytes(Map<String, dynamic> config, List<int> data) {
+    Map<String, Object> args = Map();
+    args['config'] = config;
+    args['data'] = Uint8List.fromList(data);
+    _channel.invokeMethod('rawBytes', args);
+    return Future.value(true);
+  }
 
   Future<dynamic> destroy() => _channel.invokeMethod('destroy');
 
