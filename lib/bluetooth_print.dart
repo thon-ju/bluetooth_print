@@ -20,10 +20,9 @@ class BluetoothPrint {
       StreamController.broadcast();
 
   BluetoothPrint._() {
-    _channel.setMethodCallHandler((MethodCall call) {
+    _channel.setMethodCallHandler((MethodCall call) async {
       _methodStreamController.add(call);
-      return;
-    } as Future<dynamic> Function(MethodCall)?);
+    });
   }
 
   static BluetoothPrint _instance = new BluetoothPrint._();
@@ -44,7 +43,7 @@ class BluetoothPrint {
   Stream<bool> get isScanning => _isScanning.stream;
 
   BehaviorSubject<List<BluetoothDevice>> _scanResults =
-      BehaviorSubject.seeded([]);
+      BehaviorSubject.seeded(<BluetoothDevice>[]);
 
   Stream<List<BluetoothDevice>> get scanResults => _scanResults.stream;
 
@@ -52,7 +51,7 @@ class BluetoothPrint {
 
   /// Gets the current state of the Bluetooth module
   Stream<int> get state async* {
-    yield await _channel.invokeMethod('state').then((s) => s);
+    yield (await _channel.invokeMethod('state') ?? -1);
 
     yield* _stateChannel.receiveBroadcastStream().map((s) => s);
   }
@@ -94,7 +93,8 @@ class BluetoothPrint {
         .doOnDone(stopScan)
         .map((map) {
       final device = BluetoothDevice.fromJson(Map<String, dynamic>.from(map));
-      final List<BluetoothDevice> list = _scanResults.value;
+      final List<BluetoothDevice> list =
+          _scanResults.value ?? <BluetoothDevice>[];
       int newIndex = -1;
       list.asMap().forEach((index, e) {
         if (e.address == device.address) {
