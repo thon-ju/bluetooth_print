@@ -40,7 +40,9 @@
     result(@(YES));
   } else if([@"isConnected" isEqualToString:call.method]) {
     
-    result(@(NO));
+    bool isConnected = self.stateID == 1;
+
+    result(@(isConnected));
   } else if([@"isOn" isEqualToString:call.method]) {
     result(@(YES));
   }else if([@"startScan" isEqualToString:call.method]) {
