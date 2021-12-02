@@ -108,7 +108,7 @@
        @try {
          NSDictionary *args = [call arguments];
          [Manager write:[self mapToEscCommand:args]];
-         result(nil);
+         result(@(YES));
        } @catch(FlutterError *e) {
          result(e);
        }
