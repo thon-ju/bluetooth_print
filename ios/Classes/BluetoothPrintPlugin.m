@@ -210,10 +210,13 @@
             [command addSetBarcodeHRPosition:2];
             [command addCODE128:'B' : content];
         }else if([@"qrcode" isEqualToString:type]){
-            //二维码
-            [command addQRCodeSizewithpL:0 withpH:0 withcn:0 withyfn:0 withn:[size intValue]];
-            [command addQRCodeSavewithpL:0x0b withpH:0 withcn:0x31 withyfn:0x50 withm:0x30 withData:[content dataUsingEncoding:NSUTF8StringEncoding]];
-            [command addQRCodePrintwithpL:0 withpH:0 withcn:0 withyfn:0 withm:0];
+           //  This code snippet has been copied from https://stackoverflow.com/q/34608340/1993514
+           int store_len = (int )content.length + 3;
+           int pl = (store_len % 256);
+           [command addQRCodeSizewithpL:0  withpH:0    withcn:49 withyfn:67 withn:[size intValue]];
+           [command addQRCodeLevelwithpL:0 withpH:0    withcn:49 withyfn:69 withn:[size intValue]];
+           [command addQRCodeSavewithpL:pl withpH:0    withcn:49 withyfn:80 withm:48 withData:[content dataUsingEncoding:NSASCIIStringEncoding]];
+           [command addQRCodePrintwithpL:3 withpH:pl+3 withcn:49 withyfn:81 withm:48];
         }else if([@"image" isEqualToString:type]){
             NSData *decodeData = [[NSData alloc] initWithBase64EncodedString:content options:0];
             UIImage *image = [UIImage imageWithData:decodeData];
