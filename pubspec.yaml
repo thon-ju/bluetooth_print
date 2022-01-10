@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   json_annotation: ^4.0.1
-  rxdart: ^0.27.1
+  rxdart: ^0.26.0
 
 dev_dependencies:
   flutter_test:
