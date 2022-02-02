@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 /** BluetoothPrintPlugin */
 public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, MethodCallHandler, RequestPermissionsResultListener {
@@ -199,6 +200,12 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
         break;
       case "destroy":
         result.success(destroy());
+        break;
+      case "mapToEscCommand":
+        mapTo(PrintType.RECEIPT, result, args);
+        break;
+      case "mapToTscCommand":
+        mapTo(PrintType.LABEL, result, args);
         break;
       case "print":
         print(result, args);
@@ -423,6 +430,37 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
     }
 
   }
+  
+  private void mapTo(PrintType printType, Result result, Map<String, Object> args) {
+
+    if (args.containsKey("config") && args.containsKey("data")) {
+      final Map<String,Object> config = (Map<String,Object>)args.get("config");
+      final List<Map<String,Object>> list = (List<Map<String,Object>>)args.get("data");
+      if (list == null) return;
+
+      Vector<Byte> bytes = new Vector();
+      switch (printType) {
+        case RECEIPT: 
+          bytes = PrintContent.mapToReceipt(config, list);
+          break;
+        case LABEL: 
+          bytes = PrintContent.mapToLabel(config, list);
+          break;
+        default:
+          return;
+      }
+  
+      // Convert Vector<Byte> to List<Integer> - there must be a simpler way 
+      List<Integer> ints = new ArrayList();
+      for (Byte b : bytes) {
+        ints.add(b.intValue());
+      }
+
+      result.success(ints);
+    } else{
+      result.error("please add config or data", "", null);
+    }
+  }
 
   @Override
   public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -481,3 +519,5 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
   };
 
 }
+
+enum PrintType { RECEIPT, LABEL }
