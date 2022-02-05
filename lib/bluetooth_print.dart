@@ -135,26 +135,42 @@ class BluetoothPrint {
 
   Future<dynamic> printReceipt(
       Map<String, dynamic> config, List<LineText> data) {
-    Map<String, Object> args = Map();
-    args['config'] = config;
-    args['data'] = data.map((m) {
-      return m.toJson();
-    }).toList();
+    final args = getChannelArguments(config, data);
 
     _channel.invokeMethod('printReceipt', args);
     return Future.value(true);
   }
 
   Future<dynamic> printLabel(Map<String, dynamic> config, List<LineText> data) {
-    Map<String, Object> args = Map();
-    args['config'] = config;
-    args['data'] = data.map((m) {
-      return m.toJson();
-    }).toList();
+    final args = getChannelArguments(config, data);
 
     _channel.invokeMethod('printLabel', args);
     return Future.value(true);
   }
 
   Future<dynamic> printTest() => _channel.invokeMethod('printTest');
+
+  Future<List<int>?> mapToReceipt(
+      Map<String, dynamic> config, List<LineText> data) async {
+    final args = getChannelArguments(config, data);
+
+    return await _channel.invokeListMethod('mapToEscCommand', args);
+  }
+
+  Future<List<int>?> mapToLabel(
+      Map<String, dynamic> config, List<LineText> data) async {
+    final args = getChannelArguments(config, data);
+
+    return await _channel.invokeListMethod('mapToTscCommand', args);
+  }
+}
+
+Map<String, dynamic> getChannelArguments(
+  Map<String, dynamic> config,
+  List<LineText> data,
+) {
+  return <String, dynamic>{
+    'config': config,
+    'data': data.map((m) => m.toJson()).toList(),
+  };
 }
