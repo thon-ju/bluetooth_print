@@ -35,7 +35,7 @@ BluetoothPrint is a bluetooth plugin for [Flutter](https://flutter.dev), a new m
 
 [Example](https://github.com/thon-ju/bluetooth_print/blob/master/example/lib/main.dart)
 
-To use this plugin :
+### To use this plugin :
 
 - add the dependency to your [pubspec.yaml](https://github.com/thon-ju/bluetooth_print/blob/master/example/pubspec.yaml) file.
 
@@ -46,7 +46,40 @@ To use this plugin :
     bluetooth_print:
 ```
 
-- init a BluetoothPrint instance
+### Add permissions for Bluetooth
+We need to add the permission to use Bluetooth and access location:
+
+#### **Android**
+In the **android/app/src/main/AndroidManifest.xml** let’s add:
+
+```xml 
+	 <uses-permission android:name="android.permission.BLUETOOTH" />  
+	 <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+	 <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />  
+	 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>  
+ <application
+```
+#### **IOS**
+In the **ios/Runner/Info.plist** let’s add:
+
+```dart 
+	<dict>  
+	    <key>NSBluetoothAlwaysUsageDescription</key>  
+	    <string>Need BLE permission</string>  
+	    <key>NSBluetoothPeripheralUsageDescription</key>  
+	    <string>Need BLE permission</string>  
+	    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>  
+	    <string>Need Location permission</string>  
+	    <key>NSLocationAlwaysUsageDescription</key>  
+	    <string>Need Location permission</string>  
+	    <key>NSLocationWhenInUseUsageDescription</key>  
+	    <string>Need Location permission</string>
+```
+
+For location permissions on iOS see more at: [https://developer.apple.com/documentation/corelocation/requesting_authorization_for_location_services](https://developer.apple.com/documentation/corelocation/requesting_authorization_for_location_services)
+
+### init a BluetoothPrint instance
 
 ```dart
 import 'package:bluetooth_print/bluetooth_print.dart';

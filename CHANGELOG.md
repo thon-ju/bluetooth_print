@@ -1,3 +1,7 @@
+## 4.0.1
+
+* support flutter 3.0.5.
+
 ## 3.0.1
 
 * opt format.

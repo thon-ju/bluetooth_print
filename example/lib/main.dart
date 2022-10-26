@@ -18,7 +18,7 @@ class _MyAppState extends State<MyApp> {
   BluetoothPrint bluetoothPrint = BluetoothPrint.instance;
 
   bool _connected = false;
-  BluetoothDevice _device;
+  BluetoothDevice? _device;
   String tips = 'no device connect';
 
   @override
@@ -32,7 +32,7 @@ class _MyAppState extends State<MyApp> {
   Future<void> initBluetooth() async {
     bluetoothPrint.startScan(timeout: Duration(seconds: 4));
 
-    bool isConnected=await bluetoothPrint.isConnected;
+    bool isConnected=await bluetoothPrint.isConnected??false;
 
     bluetoothPrint.state.listen((state) {
       print('cur device status: $state');
@@ -91,15 +91,15 @@ class _MyAppState extends State<MyApp> {
                     stream: bluetoothPrint.scanResults,
                     initialData: [],
                     builder: (c, snapshot) => Column(
-                      children: snapshot.data.map((d) => ListTile(
+                      children: snapshot.data!.map((d) => ListTile(
                         title: Text(d.name??''),
-                        subtitle: Text(d.address),
+                        subtitle: Text(d.address??''),
                         onTap: () async {
                           setState(() {
                             _device = d;
                           });
                         },
-                        trailing: _device!=null && _device.address == d.address?Icon(
+                        trailing: _device!=null && _device!.address == d.address?Icon(
                           Icons.check,
                           color: Colors.green,
                         ):null,
@@ -117,8 +117,8 @@ class _MyAppState extends State<MyApp> {
                             OutlinedButton(
                               child: Text('connect'),
                               onPressed:  _connected?null:() async {
-                                if(_device!=null && _device.address !=null){
-                                  await bluetoothPrint.connect(_device);
+                                if(_device!=null && _device!.address !=null){
+                                  await bluetoothPrint.connect(_device!);
                                 }else{
                                   setState(() {
                                     tips = 'please select device';
@@ -196,7 +196,7 @@ class _MyAppState extends State<MyApp> {
           stream: bluetoothPrint.isScanning,
           initialData: false,
           builder: (c, snapshot) {
-            if (snapshot.data) {
+            if (snapshot.data == true) {
               return FloatingActionButton(
                 child: Icon(Icons.stop),
                 onPressed: () => bluetoothPrint.stopScan(),
