@@ -26,6 +26,9 @@ class LineText {
       this.weight = 0, //0,1
       this.width = 0, //0,1
       this.height = 0, //0,1
+      this.absolutePos = 0,
+      this.relativePos = 0,
+      this.fontZoom = 1,
       this.underline = 0, //0,1
       this.linefeed = 0, //0,1
       this.x = 0,
@@ -39,15 +42,38 @@ class LineText {
   static const int ALIGN_CENTER = 1;
   static const int ALIGN_RIGHT = 2;
 
+  /// print type ,inculde['text','barcode','qrcode','image']
   final String? type;
+
+  /// ['text','barcode','qrcode','image'] need print content
   final String? content;
+
+  /// ['qrcode'] qrcode size ,only when type is qrcode
   final int? size;
+
+  /// ['text'] text align
   final int? align;
+
+  /// ['text'] double
   final int? weight;
   final int? width;
   final int? height;
+
+  /// ['text'] absolute position from line begin
+  final int? absolutePos;
+
+  /// ['text'] relative position from last content
+  final int? relativePos;
+
+  /// ['text'] font zoom level, include 1-8
+  final int? fontZoom;
+
+  /// ['text'] show underline
   final int? underline;
+
+  /// ['text'] print linebreak
   final int? linefeed;
+
   final int? x;
   final int? y;
 

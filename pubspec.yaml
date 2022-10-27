@@ -1,6 +1,6 @@
 name: bluetooth_print
 description: BluetoothPrint is a bluetooth plugin to help developers build bluetooth thermal printer apps for both iOS and Android.
-version: 4.0.1
+version: 4.1.0
 homepage: https://github.com/thon-ju/bluetooth_print
 
 environment:
