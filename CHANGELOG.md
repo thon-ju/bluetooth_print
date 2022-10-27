@@ -1,3 +1,7 @@
+## 4.1.0
+
+* Receipt print (esc mode) support set text absolute position and relative position
+
 ## 4.0.1
 
 * support flutter 3.0.5.
