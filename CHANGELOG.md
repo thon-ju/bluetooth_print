@@ -1,3 +1,8 @@
+## 4.2.0
+
+* opt permission check
+
+
 ## 4.1.0
 
 * Receipt print (esc mode) support set text absolute position and relative position

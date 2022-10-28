@@ -3,7 +3,6 @@ package com.example.bluetooth_print;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -11,42 +10,35 @@ import android.util.Log;
 import com.gprinter.io.*;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Vector;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author thon
+ */
 public class DeviceConnFactoryManager {
+    private static final String TAG = DeviceConnFactoryManager.class.getSimpleName();
 
     public PortManager mPort;
 
-    private static final String TAG = DeviceConnFactoryManager.class.getSimpleName();
-
     public CONN_METHOD connMethod;
 
-    private String ip;
+    private final String macAddress;
 
-    private int port;
+    private final Context mContext;
 
-    private String macAddress;
-
-    private UsbDevice mUsbDevice;
-
-    private Context mContext;
-
-    private String serialPortPath;
-
-    private int baudrate;
-
-    private int id;
-
-    private static DeviceConnFactoryManager[] deviceConnFactoryManagers = new DeviceConnFactoryManager[4];
+    private static Map<String, DeviceConnFactoryManager> deviceConnFactoryManagers = new HashMap<>();
 
     private boolean isOpenPort;
     /**
      * ESC查询打印机实时状态指令
      */
-    private byte[] esc = {0x10, 0x04, 0x02};
+    private final byte[] esc = {0x10, 0x04, 0x02};
 
     /**
      * ESC查询打印机实时状态 缺纸状态
@@ -66,7 +58,7 @@ public class DeviceConnFactoryManager {
     /**
      * TSC查询打印机状态指令
      */
-    private byte[] tsc = {0x1b, '!', '?'};
+    private final byte[] tsc = {0x1b, '!', '?'};
 
     /**
      * TSC指令查询打印机实时状态 打印机缺纸状态
@@ -83,7 +75,7 @@ public class DeviceConnFactoryManager {
      */
     private static final int TSC_STATE_ERR_OCCURS = 0x80;
 
-    private byte[] cpcl={0x1b,0x68};
+    private final byte[] cpcl={0x1b,0x68};
 
     /**
      * CPCL指令查询打印机实时状态 打印机缺纸状态
@@ -95,6 +87,7 @@ public class DeviceConnFactoryManager {
     private static final int CPCL_STATE_COVER_OPEN = 0x02;
 
     private byte[] sendCommand;
+
     /**
      * 判断打印机所使用指令是否是ESC指令
      */
@@ -109,14 +102,13 @@ public class DeviceConnFactoryManager {
     public static final String STATE = "state";
     public static final String DEVICE_ID = "id";
     public static final int CONN_STATE_DISCONNECT = 0x90;
-    public static final int CONN_STATE_CONNECTING = CONN_STATE_DISCONNECT << 1;
-    public static final int CONN_STATE_FAILED = CONN_STATE_DISCONNECT << 2;
     public static final int CONN_STATE_CONNECTED = CONN_STATE_DISCONNECT << 3;
     public PrinterReader reader;
     private int queryPrinterCommandFlag;
     private final int ESC = 1;
     private final int TSC = 3;
     private final int CPCL = 2;
+
     public enum CONN_METHOD {
         //蓝牙连接
         BLUETOOTH("BLUETOOTH"),
@@ -127,7 +119,7 @@ public class DeviceConnFactoryManager {
         //串口连接
         SERIAL_PORT("SERIAL_PORT");
 
-        private String name;
+        private final String name;
 
         private CONN_METHOD(String name) {
             this.name = name;
@@ -139,37 +131,23 @@ public class DeviceConnFactoryManager {
         }
     }
 
-    public static DeviceConnFactoryManager[] getDeviceConnFactoryManagers() {
+    public static Map<String, DeviceConnFactoryManager> getDeviceConnFactoryManagers() {
         return deviceConnFactoryManagers;
     }
 
     /**
      * 打开端口
-     *
-     * @return
      */
     public void openPort() {
-        deviceConnFactoryManagers[id].isOpenPort = false;
+        DeviceConnFactoryManager deviceConnFactoryManager = deviceConnFactoryManagers.get(macAddress);
+        if(deviceConnFactoryManager == null){
+            return;
+        }
 
-        switch (deviceConnFactoryManagers[id].connMethod) {
-            case BLUETOOTH:
-                mPort = new BluetoothPort(macAddress);
-                isOpenPort = deviceConnFactoryManagers[id].mPort.openPort();
-                break;
-            case USB:
-                mPort = new UsbPort(mContext, mUsbDevice);
-                isOpenPort = mPort.openPort();
-                break;
-            case WIFI:
-                mPort = new EthernetPort(ip, port);
-                isOpenPort = mPort.openPort();
-                break;
-            case SERIAL_PORT:
-                mPort = new SerialPort(serialPortPath, baudrate, 0);
-                isOpenPort = mPort.openPort();
-                break;
-            default:
-                break;
+        deviceConnFactoryManager.isOpenPort = false;
+        if (deviceConnFactoryManager.connMethod == CONN_METHOD.BLUETOOTH) {
+            mPort = new BluetoothPort(macAddress);
+            isOpenPort = deviceConnFactoryManager.mPort.openPort();
         }
 
         //端口打开成功后，检查连接打印机所使用的打印机指令ESC、TSC
@@ -197,8 +175,6 @@ public class DeviceConnFactoryManager {
 
     /**
      * 获取端口连接方式
-     *
-     * @return
      */
     public CONN_METHOD getConnMethod() {
         return connMethod;
@@ -206,8 +182,6 @@ public class DeviceConnFactoryManager {
 
     /**
      * 获取端口打开状态（true 打开，false 未打开）
-     *
-     * @return
      */
     public boolean getConnState() {
         return isOpenPort;
@@ -215,38 +189,9 @@ public class DeviceConnFactoryManager {
 
     /**
      * 获取连接蓝牙的物理地址
-     *
-     * @return
      */
     public String getMacAddress() {
         return macAddress;
-    }
-
-    /**
-     * 获取连接网口端口号
-     *
-     * @return
-     */
-    public int getPort() {
-        return port;
-    }
-
-    /**
-     * 获取连接网口的IP
-     *
-     * @return
-     */
-    public String getIp() {
-        return ip;
-    }
-
-    /**
-     * 获取连接的USB设备信息
-     *
-     * @return
-     */
-    public UsbDevice usbDevice() {
-        return mUsbDevice;
     }
 
     /**
@@ -265,34 +210,17 @@ public class DeviceConnFactoryManager {
                 currentPrinterCommand = null;
             }
 
+            Log.e(TAG, "******************* close Port macAddress -> " + macAddress);
         }
-
-    }
-
-    /**
-     * 获取串口号
-     *
-     * @return
-     */
-    public String getSerialPortPath() {
-        return serialPortPath;
-    }
-
-    /**
-     * 获取波特率
-     *
-     * @return
-     */
-    public int getBaudrate() {
-        return baudrate;
     }
 
     public static void closeAllPort() {
-        for (DeviceConnFactoryManager deviceConnFactoryManager : deviceConnFactoryManagers) {
+        for (DeviceConnFactoryManager deviceConnFactoryManager : deviceConnFactoryManagers.values()) {
             if (deviceConnFactoryManager != null) {
-                Log.e(TAG, "cloaseAllPort() id -> " + deviceConnFactoryManager.id);
+                Log.e(TAG, "******************* close All Port macAddress -> " + deviceConnFactoryManager.macAddress);
+
                 deviceConnFactoryManager.closePort();
-                deviceConnFactoryManagers[deviceConnFactoryManager.id] = null;
+                deviceConnFactoryManagers.put(deviceConnFactoryManager.macAddress, null);
             }
         }
     }
@@ -300,14 +228,8 @@ public class DeviceConnFactoryManager {
     private DeviceConnFactoryManager(Build build) {
         this.connMethod = build.connMethod;
         this.macAddress = build.macAddress;
-        this.port = build.port;
-        this.ip = build.ip;
-        this.mUsbDevice = build.usbDevice;
         this.mContext = build.context;
-        this.serialPortPath = build.serialPortPath;
-        this.baudrate = build.baudrate;
-        this.id = build.id;
-        deviceConnFactoryManagers[id] = this;
+        deviceConnFactoryManagers.put(build.macAddress, this);
     }
 
     /**
@@ -316,37 +238,16 @@ public class DeviceConnFactoryManager {
      * @return PrinterCommand
      */
     public PrinterCommand getCurrentPrinterCommand() {
-        return deviceConnFactoryManagers[id].currentPrinterCommand;
+        return Objects.requireNonNull(deviceConnFactoryManagers.get(macAddress)).currentPrinterCommand;
     }
 
     public static final class Build {
-        private String ip;
         private String macAddress;
-        private UsbDevice usbDevice;
-        private int port;
         private CONN_METHOD connMethod;
         private Context context;
-        private String serialPortPath;
-        private int baudrate;
-        private int id;
-
-        public DeviceConnFactoryManager.Build setIp(String ip) {
-            this.ip = ip;
-            return this;
-        }
 
         public DeviceConnFactoryManager.Build setMacAddress(String macAddress) {
             this.macAddress = macAddress;
-            return this;
-        }
-
-        public DeviceConnFactoryManager.Build setUsbDevice(UsbDevice usbDevice) {
-            this.usbDevice = usbDevice;
-            return this;
-        }
-
-        public DeviceConnFactoryManager.Build setPort(int port) {
-            this.port = port;
             return this;
         }
 
@@ -357,21 +258,6 @@ public class DeviceConnFactoryManager {
 
         public DeviceConnFactoryManager.Build setContext(Context context) {
             this.context = context;
-            return this;
-        }
-
-        public DeviceConnFactoryManager.Build setId(int id) {
-            this.id = id;
-            return this;
-        }
-
-        public DeviceConnFactoryManager.Build setSerialPort(String serialPortPath) {
-            this.serialPortPath = serialPortPath;
-            return this;
-        }
-
-        public DeviceConnFactoryManager.Build setBaudrate(int baudrate) {
-            this.baudrate = baudrate;
             return this;
         }
 
@@ -394,9 +280,9 @@ public class DeviceConnFactoryManager {
     }
     public void sendByteDataImmediately(final byte [] data) {
         if (this.mPort != null) {
-            Vector<Byte> datas=new Vector<Byte>();
-            for(int i = 0; i < data.length; ++i) {
-                datas.add(Byte.valueOf(data[i]));
+            Vector<Byte> datas = new Vector<Byte>();
+            for (byte datum : data) {
+                datas.add(Byte.valueOf(datum));
             }
             try {
                 this.mPort.writeDataImmediately(datas, 0, datas.size());
@@ -444,7 +330,7 @@ public class DeviceConnFactoryManager {
                             }
                         }
                         if (currentPrinterCommand != null) {
-                            if (scheduledExecutorService != null && !scheduledExecutorService.isShutdown()) {
+                            if (!scheduledExecutorService.isShutdown()) {
                                 scheduledExecutorService.shutdown();
                             }
                             return;
@@ -466,8 +352,8 @@ public class DeviceConnFactoryManager {
                                 break;
                         }
                         Vector<Byte> data = new Vector<>(sendCommand.length);
-                        for (int i = 0; i < sendCommand.length; i++) {
-                            data.add(sendCommand[i]);
+                        for (byte b : sendCommand) {
+                            data.add(b);
                         }
                         sendDataImmediately(data);
                         queryPrinterCommandFlag++;
@@ -479,8 +365,7 @@ public class DeviceConnFactoryManager {
 
     class PrinterReader extends Thread {
         private boolean isRun = false;
-
-        private byte[] buffer = new byte[100];
+        private final byte[] buffer = new byte[100];
 
         public PrinterReader() {
             isRun = true;
@@ -491,9 +376,9 @@ public class DeviceConnFactoryManager {
             try {
                 while (isRun && mPort != null) {
                     //读取打印机返回信息,打印机没有返回纸返回-1
-                    Log.e(TAG,"wait read ");
+                    Log.e(TAG,"******************* wait read ");
                     int len = readDataImmediately(buffer);
-                    Log.e(TAG," read "+len);
+                    Log.e(TAG,"******************* read "+len);
                     if (len > 0) {
                         Message message = Message.obtain();
                         message.what = READ_DATA;
@@ -505,7 +390,7 @@ public class DeviceConnFactoryManager {
                     }
                 }
             } catch (Exception e) {//异常断开
-                if (deviceConnFactoryManagers[id] != null) {
+                if (deviceConnFactoryManagers.get(macAddress) != null) {
                     closePort();
                     mHandler.obtainMessage(Constant.abnormal_Disconnection).sendToTarget();
                 }
@@ -518,12 +403,12 @@ public class DeviceConnFactoryManager {
     }
 
     @SuppressLint("HandlerLeak")
-    private Handler mHandler = new Handler() {
+    private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case Constant.abnormal_Disconnection://异常断开连接
-                    Log.d(TAG, "abnormal disconnection");
+                    Log.d(TAG, "******************* abnormal disconnection");
                     sendStateBroadcast(Constant.abnormal_Disconnection);
                     break;
                 case DEFAUIT_COMMAND://默认模式
@@ -546,19 +431,19 @@ public class DeviceConnFactoryManager {
                         } else {//查询打印机状态
                             if (result == 0) {//打印机状态查询
                                 Intent intent = new Intent(ACTION_QUERY_PRINTER_STATE);
-                                intent.putExtra(DEVICE_ID, id);
+                                intent.putExtra(DEVICE_ID, macAddress);
                                 if(mContext!=null){
                                     mContext.sendBroadcast(intent);
                                 }
                             } else if (result == 1) {//查询打印机实时状态
                                 if ((buffer[0] & ESC_STATE_PAPER_ERR) > 0) {
-                                    status += " Printer out of paper";
+                                    status += "*******************  Printer out of paper";
                                 }
                                 if ((buffer[0] & ESC_STATE_COVER_OPEN) > 0) {
-                                    status += " Printer open cover";
+                                    status += "*******************  Printer open cover";
                                 }
                                 if ((buffer[0] & ESC_STATE_ERR_OCCURS) > 0) {
-                                    status += " Printer error";
+                                    status += "*******************  Printer error";
                                 }
                                 Log.d(TAG, status);
                             }
@@ -570,19 +455,22 @@ public class DeviceConnFactoryManager {
                             sendStateBroadcast(CONN_STATE_CONNECTED);
                         } else {
                             if (cnt == 1) {//查询打印机实时状态
-                                if ((buffer[0] & TSC_STATE_PAPER_ERR) > 0) {//缺纸
-                                    status += " Printer out of paper";
+                                if ((buffer[0] & TSC_STATE_PAPER_ERR) > 0) {
+                                    //缺纸
+                                    status += "*******************  Printer out of paper";
                                 }
-                                if ((buffer[0] & TSC_STATE_COVER_OPEN) > 0) {//开盖
-                                    status += " Printer open cover";
+                                if ((buffer[0] & TSC_STATE_COVER_OPEN) > 0) {
+                                    //开盖
+                                    status += "*******************  Printer open cover";
                                 }
-                                if ((buffer[0] & TSC_STATE_ERR_OCCURS) > 0) {//打印机报错
-                                    status += " Printer error";
+                                if ((buffer[0] & TSC_STATE_ERR_OCCURS) > 0) {
+                                    //打印机报错
+                                    status += "*******************  Printer error";
                                 }
                                 Log.d(TAG, status);
                             } else {//打印机状态查询
                                 Intent intent = new Intent(ACTION_QUERY_PRINTER_STATE);
-                                intent.putExtra(DEVICE_ID, id);
+                                intent.putExtra(DEVICE_ID, macAddress);
                                 if(mContext!=null){
                                     mContext.sendBroadcast(intent);
                                 }
@@ -596,15 +484,15 @@ public class DeviceConnFactoryManager {
                             if (cnt == 1) {
 
                                 if ((buffer[0] ==CPCL_STATE_PAPER_ERR)) {//缺纸
-                                    status += " Printer out of paper";
+                                    status += "*******************  Printer out of paper";
                                 }
                                 if ((buffer[0] ==CPCL_STATE_COVER_OPEN)) {//开盖
-                                    status += " Printer open cover";
+                                    status += "*******************  Printer open cover";
                                 }
                                 Log.d(TAG, status);
                             } else {//打印机状态查询
                                 Intent intent = new Intent(ACTION_QUERY_PRINTER_STATE);
-                                intent.putExtra(DEVICE_ID, id);
+                                intent.putExtra(DEVICE_ID, macAddress);
                                 if(mContext!=null){
                                     mContext.sendBroadcast(intent);
                                 }
@@ -620,12 +508,11 @@ public class DeviceConnFactoryManager {
 
     /**
      * 发送广播
-     * @param state
      */
     private void sendStateBroadcast(int state) {
         Intent intent = new Intent(ACTION_CONN_STATE);
         intent.putExtra(STATE, state);
-        intent.putExtra(DEVICE_ID, id);
+        intent.putExtra(DEVICE_ID, macAddress);
         if(mContext != null){
             mContext.sendBroadcast(intent);//此处若报空指针错误，需要在清单文件application标签里注册此类，参考demo
         }

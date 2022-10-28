@@ -12,19 +12,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+/**
+ * @author thon
+ */
 public class PrintContent {
       private static final String TAG = PrintContent.class.getSimpleName();
 
       /**
        * 票据打印对象转换
-       * @return
        */
       public static Vector<Byte> mapToReceipt(Map<String,Object> config, List<Map<String,Object>> list) {
             EscCommand esc = new EscCommand();
             //初始化打印机
             esc.addInitializePrinter();
             //打印走纸多少个单位
-            esc.addPrintAndFeedLines((byte) 3);
+            esc.addPrintAndFeedLines((byte) 1);
 
             // {type:'text|barcode|qrcode|image', content:'', size:4, align: 0|1|2, weight: 0|1, width:0|1, height:0|1, underline:0|1, linefeed: 0|1}
             for (Map<String,Object> m: list) {
@@ -100,7 +102,7 @@ public class PrintContent {
             }
 
             //打印走纸n个单位
-            esc.addPrintAndFeedLines((byte) 2);
+            esc.addPrintAndFeedLines((byte) 1);
 
             // 开钱箱
             esc.addGeneratePlus(LabelCommand.FOOT.F2, (byte) 255, (byte) 255);
@@ -116,7 +118,6 @@ public class PrintContent {
 
       /**
        * 标签打印对象转换
-       * @return
        */
       public static Vector<Byte> mapToLabel(Map<String,Object> config, List<Map<String,Object>> list) {
             LabelCommand tsc = new LabelCommand();
@@ -179,7 +180,6 @@ public class PrintContent {
 
       /**
        * 面单打印对象转换
-       * @return
        */
       public static Vector<Byte> mapToCPCL(Map<String,Object> config, List<Map<String,Object>> list) {
             CpclCommand cpcl = new CpclCommand();

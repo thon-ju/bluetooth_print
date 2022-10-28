@@ -35,7 +35,7 @@ class _MyAppState extends State<MyApp> {
     bool isConnected=await bluetoothPrint.isConnected??false;
 
     bluetoothPrint.state.listen((state) {
-      print('cur device status: $state');
+      print('******************* cur device status: $state');
 
       switch (state) {
         case BluetoothPrint.CONNECTED:
@@ -118,6 +118,9 @@ class _MyAppState extends State<MyApp> {
                               child: Text('connect'),
                               onPressed:  _connected?null:() async {
                                 if(_device!=null && _device!.address !=null){
+                                  setState(() {
+                                    tips = 'connecting...';
+                                  });
                                   await bluetoothPrint.connect(_device!);
                                 }else{
                                   setState(() {
@@ -131,11 +134,15 @@ class _MyAppState extends State<MyApp> {
                             OutlinedButton(
                               child: Text('disconnect'),
                               onPressed:  _connected?() async {
+                                setState(() {
+                                  tips = 'disconnecting...';
+                                });
                                 await bluetoothPrint.disconnect();
                               }:null,
                             ),
                           ],
                         ),
+                        Divider(),
                         OutlinedButton(
                           child: Text('print receipt(esc)'),
                           onPressed:  _connected?() async {
