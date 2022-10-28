@@ -1,5 +1,6 @@
 package com.example.bluetooth_print;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.usb.UsbDevice;
@@ -516,6 +517,7 @@ public class DeviceConnFactoryManager {
         }
     }
 
+    @SuppressLint("HandlerLeak")
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
