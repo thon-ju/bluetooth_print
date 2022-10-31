@@ -107,6 +107,20 @@
      } @catch(FlutterError *e) {
        result(e);
      }
+  } else if([@"mapToEscCommand" isEqualToString:call.method]) {
+       @try {
+         NSDictionary *args = [call arguments];
+         result([self mapToEscCommand:args]);
+       } @catch(FlutterError *e) {
+         result(e);
+       }
+  } else if([@"mapToTscCommand" isEqualToString:call.method]) {
+       @try {
+         NSDictionary *args = [call arguments];
+         result([self mapToTscCommand:args]);
+       } @catch(FlutterError *e) {
+         result(e);
+       }
   } else if([@"printReceipt" isEqualToString:call.method]) {
        @try {
          NSDictionary *args = [call arguments];
