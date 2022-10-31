@@ -7,6 +7,7 @@
 @property(nonatomic, retain) NSObject<FlutterPluginRegistrar> *registrar;
 @property(nonatomic, retain) FlutterMethodChannel *channel;
 @property(nonatomic, retain) BluetoothPrintStreamHandler *stateStreamHandler;
+@property(nonatomic, assign) int stateID;
 @property(nonatomic) NSMutableDictionary *scannedPeripherals;
 @end
 
@@ -33,13 +34,15 @@
   NSLog(@"call method -> %@", call.method);
     
   if ([@"state" isEqualToString:call.method]) {
-    result(nil);
+    result([NSNumber numberWithInt:self.stateID]);
   } else if([@"isAvailable" isEqualToString:call.method]) {
     
     result(@(YES));
   } else if([@"isConnected" isEqualToString:call.method]) {
     
-    result(@(NO));
+    bool isConnected = self.stateID == 1;
+
+    result(@(isConnected));
   } else if([@"isOn" isEqualToString:call.method]) {
     result(@(YES));
   }else if([@"startScan" isEqualToString:call.method]) {
@@ -255,10 +258,12 @@
             case CONNECT_STATE_CONNECTING:
                 NSLog(@"status -> %@", @"连接状态：连接中....");
                 ret = @0;
+                self.stateID = 0;
                 break;
             case CONNECT_STATE_CONNECTED:
                 NSLog(@"status -> %@", @"连接状态：连接成功");
                 ret = @1;
+                self.stateID = 1;
                 break;
             case CONNECT_STATE_FAILT:
                 NSLog(@"status -> %@", @"连接状态：连接失败");
@@ -267,10 +272,12 @@
             case CONNECT_STATE_DISCONNECT:
                 NSLog(@"status -> %@", @"连接状态：断开连接");
                 ret = @0;
+                self.stateID = -1;
                 break;
             default:
                 NSLog(@"status -> %@", @"连接状态：连接超时");
                 ret = @0;
+                self.stateID = -1;
                 break;
         }
         
