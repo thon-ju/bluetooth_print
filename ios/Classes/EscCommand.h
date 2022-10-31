@@ -51,8 +51,15 @@
 /**
  * 方法说明：设置打印模式，0x1B 0x21 n(0-255)，根据n的值设置字符打印模式
  *@param n 二进制默认为00000000(0X0),10001000(0X88)表示下划线和加粗，00001000(0X08)表示加粗，10000000(0X80)表示下划线
+ *
+ * Set the print mode, where n can be either:
+ *   0   (00000000) means default
+ *   8   (00001000) means bold
+ *   128 (10000000) means underline
+ *   136 (10001000) means underline and bold
  */
 -(void) addPrintMode:(int) n;
+
 /**
  * 方法说明：设置国际字符集，默认为美国0
  * @param n 字符集编号
@@ -101,6 +108,12 @@
 /**
  * 方法说明：设置字符放大，限制为不放大和放大2倍，n=0x11
  * @param n = width | height 宽度放大倍数，0 ≤n ≤255 （1 ≤ 纵向放大倍数 ≤8，1 ≤ 横向放达倍数 ≤8）[描述]   用0 到2 位选择字符高度，4 到7 位选择字符宽度
+ *
+ * Set character size, where n can be either:
+ *   0  (0000) means default
+ *   2  (0010) means double height
+ *   16 (1000) means double width
+ *   18 (1010) means double height and width
  */
 -(void) addSetCharcterSize:(int) n;
 

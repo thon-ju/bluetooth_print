@@ -204,9 +204,21 @@
         [command addSetJustification:[align intValue]];
         
         if([@"text" isEqualToString:type]){
-            [command addPrintMode: [weight intValue] ==0?0:0|8|16|32];
+            
+            Byte mode = PrintModeEnumDefault;
+            if ([weight intValue] == 1) mode = mode | PrintModeEnumBold;
+            if ([underline intValue] == 1) mode = mode | PrintModeEnumUnderline;
+            [command addPrintMode: mode];
+
+            Byte size = CharacterSizeEnumDefault;
+            if ([height intValue] == 1) size = size | CharacterSizeEnumDoubleHeight;
+            if ([width intValue] == 1) size = size | CharacterSizeEnumDoubleWidth;
+            [command addSetCharcterSize: size];
+            
             [command addText:content];
-            [command addPrintMode: 0];
+            [command addPrintMode: PrintModeEnumDefault];
+            [command addSetCharcterSize: CharacterSizeEnumDefault];
+
         }else if([@"barcode" isEqualToString:type]){
             [command addSetBarcodeWidth:2];
             [command addSetBarcodeHeight:60];
