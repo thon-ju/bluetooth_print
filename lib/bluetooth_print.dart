@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:rxdart/rxdart.dart';
@@ -43,7 +44,7 @@ class BluetoothPrint {
   Stream<bool> get isScanning => _isScanning.stream;
 
   BehaviorSubject<List<BluetoothDevice>> _scanResults =
-      BehaviorSubject.seeded([]);
+      BehaviorSubject.seeded(<BluetoothDevice>[]);
 
   Stream<List<BluetoothDevice>> get scanResults => _scanResults.stream;
 
@@ -51,7 +52,7 @@ class BluetoothPrint {
 
   /// Gets the current state of the Bluetooth module
   Stream<int> get state async* {
-    yield await _channel.invokeMethod('state').then((s) => s);
+    yield (await _channel.invokeMethod('state') ?? -1);
 
     yield* _stateChannel.receiveBroadcastStream().map((s) => s);
   }
@@ -93,7 +94,8 @@ class BluetoothPrint {
         .doOnDone(stopScan)
         .map((map) {
       final device = BluetoothDevice.fromJson(Map<String, dynamic>.from(map));
-      final List<BluetoothDevice> list = _scanResults.value;
+      final List<BluetoothDevice> list =
+          _scanResults.value ?? <BluetoothDevice>[];
       int newIndex = -1;
       list.asMap().forEach((index, e) {
         if (e.address == device.address) {
@@ -129,6 +131,14 @@ class BluetoothPrint {
       _channel.invokeMethod('connect', device.toJson());
 
   Future<dynamic> disconnect() => _channel.invokeMethod('disconnect');
+
+  Future<dynamic> rawBytes(Map<String, dynamic> config, List<int> data) {
+    Map<String, Object> args = Map();
+    args['config'] = config;
+    args['data'] = Uint8List.fromList(data);
+    _channel.invokeMethod('rawBytes', args);
+    return Future.value(true);
+  }
 
   Future<dynamic> destroy() => _channel.invokeMethod('destroy');
 

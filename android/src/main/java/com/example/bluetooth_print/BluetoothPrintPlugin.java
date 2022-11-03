@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 /**
  * BluetoothPrintPlugin
@@ -207,6 +208,10 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
         break;
       case "destroy":
         result.success(destroy());
+        break;
+      case "rawBytes":
+        Log.i("NATIVE","rawBytes");
+        printRawBytes(result,args);
         break;
       case "print":
       case "printReceipt":
@@ -431,6 +436,40 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
             deviceConnFactoryManager.sendDataImmediately(PrintContent.mapToLabel(config, list));
           }else if (printerCommand == PrinterCommand.CPCL) {
             deviceConnFactoryManager.sendDataImmediately(PrintContent.mapToCPCL(config, list));
+          }
+        }
+      });
+    }else{
+      result.error("please add config or data", "", null);
+    }
+
+  }
+
+  private void printRawBytes(Result result, Map<String, Object> args) {
+    if (DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id] == null ||
+            !DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].getConnState()) {
+
+      result.error("not connect", "state not right", null);
+    }
+
+    if (args.containsKey("config") && args.containsKey("data")) {
+      final Map<String,Object> config = (Map<String,Object>)args.get("config");
+//      final List<Map<String,Object>> list = (List<Map<String,Object>>)args.get("data");
+      final byte [] bytes = (byte [])args.get("data");
+      if(bytes == null){
+        return;
+      }
+
+      threadPool = ThreadPool.getInstantiation();
+      threadPool.addSerialTask(new Runnable() {
+        @Override
+        public void run() {
+          if (DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].getCurrentPrinterCommand() == PrinterCommand.ESC) {
+            DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].sendByteDataImmediately(bytes);
+          }else if (DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].getCurrentPrinterCommand() == PrinterCommand.TSC) {
+            DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].sendByteDataImmediately(bytes);
+          }else if (DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].getCurrentPrinterCommand() == PrinterCommand.CPCL) {
+            DeviceConnFactoryManager.getDeviceConnFactoryManagers()[id].sendByteDataImmediately(bytes);
           }
         }
       });

@@ -115,7 +115,17 @@
        } @catch(FlutterError *e) {
          result(e);
        }
-  } else if([@"printLabel" isEqualToString:call.method]) {
+  } else if([@"rawBytes" isEqualToString:call.method]) {
+      @try {
+        NSDictionary *args = [call arguments];
+        NSDictionary *config = [args objectForKey:@"config"];
+        FlutterStandardTypedData *list = [args objectForKey:@"data"];
+        [Manager write:list.data];
+        result(nil);
+      } @catch(FlutterError *e) {
+        result(e);
+      }
+ } else if([@"printLabel" isEqualToString:call.method]) {
      @try {
        NSDictionary *args = [call arguments];
        [Manager write:[self mapToTscCommand:args]];
@@ -268,26 +278,26 @@
         NSNumber *ret = @0;
         switch (state) {
             case CONNECT_STATE_CONNECTING:
-                NSLog(@"status -> %@", @"连接状态：连接中....");
+                NSLog(@"status -> %@", @"Connection status: Connecting....");
                 ret = @0;
                 self.stateID = 0;
                 break;
             case CONNECT_STATE_CONNECTED:
-                NSLog(@"status -> %@", @"连接状态：连接成功");
+                NSLog(@"status -> %@", @"Connection status: successfully connected");
                 ret = @1;
                 self.stateID = 1;
                 break;
             case CONNECT_STATE_FAILT:
-                NSLog(@"status -> %@", @"连接状态：连接失败");
+                NSLog(@"status -> %@", @"Connection status: connection failed");
                 ret = @0;
                 break;
             case CONNECT_STATE_DISCONNECT:
-                NSLog(@"status -> %@", @"连接状态：断开连接");
+                NSLog(@"status -> %@", @"Connection status: disconnected");
                 ret = @0;
                 self.stateID = -1;
                 break;
             default:
-                NSLog(@"status -> %@", @"连接状态：连接超时");
+                NSLog(@"status -> %@", @"Connection status: connection timed out");
                 ret = @0;
                 self.stateID = -1;
                 break;
