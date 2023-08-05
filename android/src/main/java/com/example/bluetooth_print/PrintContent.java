@@ -92,7 +92,7 @@ public class PrintContent {
                         byte[] bytes = Base64.decode(content, Base64.DEFAULT);
                         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                         // esc.addRastBitImage(bitmap, 576, 0);
-                        esc.addRastBitImage(bitmap, width, 0);
+                        esc.addRastBitImage(bitmap, (width != 0 ? width : 576), 0);
                   }
 
                   if(linefeed == 1){
