@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:rxdart/rxdart.dart';
@@ -152,6 +153,24 @@ class BluetoothPrint {
     }).toList();
 
     _channel.invokeMethod('printLabel', args);
+    return Future.value(true);
+  }
+
+  Future<dynamic> writeByte(Map<String, dynamic> config, List<int> data) {
+
+    print("object");
+
+    Map<String, Object> args = Map();
+    args['config'] = config;
+    args['data'] = jsonEncode(data);
+
+    // args['data'] = data.map((m) {
+    //   return m.toJson();
+    // }).toList();
+
+    //print(args['data']);
+
+    _channel.invokeMethod('writeByte', args);
     return Future.value(true);
   }
 
