@@ -36,6 +36,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.util.Base64;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
+
+import java.util.List;
+import java.util.Vector;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+
+// import com.fasterxml.jackson.databind.JsonNode;
+// import com.fasterxml.jackson.databind.ObjectMapper;
+
+// import javax.xml.bind.DatatypeConverter;
+
 /**
  * BluetoothPrintPlugin
  * @author thon

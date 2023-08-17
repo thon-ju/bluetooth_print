@@ -274,8 +274,7 @@ public class DeviceConnFactoryManager {
             this.mPort.writeDataImmediately(data, 0, data.size());
         } catch (Exception e) {//异常中断发送
             mHandler.obtainMessage(Constant.abnormal_Disconnection).sendToTarget();
-//            e.printStackTrace();
-
+            //e.printStackTrace();
         }
     }
     public void sendByteDataImmediately(final byte [] data) {
