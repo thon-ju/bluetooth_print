@@ -456,14 +456,6 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
 
   }
 
-  public static byte[] convertIntArrayToByteArray(int[] intArray) {
-        byte[] byteArray = new byte[intArray.length];
-        for (int i = 0; i < intArray.length; i++) {
-            byteArray[i] = (byte) (intArray[i] & 0xFF);
-        }
-        return byteArray;
-    }
-
   @Override
   public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
 
