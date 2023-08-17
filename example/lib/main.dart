@@ -176,8 +176,8 @@ class _MyAppState extends State<MyApp> {
                           child: Text('print label(tsc)'),
                           onPressed:  _connected?() async {
                             Map<String, dynamic> config = Map();
-                            config['width'] = 400; // 标签宽度，单位mm
-                            config['height'] = 500; // 标签高度，单位mm
+                            config['width'] = 100; // 标签宽度，单位mm
+                            config['height'] = 150; // 标签高度，单位mm
                             config['gap'] = 2; // 标签间隔，单位mm
 
                             // x、y坐标位置，单位dpi，1mm=8dpi
@@ -191,7 +191,7 @@ class _MyAppState extends State<MyApp> {
                             ByteData data = await rootBundle.load("assets/images/test_page.jpg");
                             List<int> imageBytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
                             String base64Image = base64Encode(imageBytes);
-                            list1.add(LineText(type: LineText.TYPE_IMAGE, width: 400, height: 550, content: base64Image));
+                            list1.add(LineText(type: LineText.TYPE_IMAGE, content: base64Image, align: LineText.ALIGN_CENTER, width: 850));
 
                             await bluetoothPrint.printLabel(config, list1);
                             //await bluetoothPrint.writeByte(config, imageBytes);

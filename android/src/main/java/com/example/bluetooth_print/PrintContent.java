@@ -162,9 +162,10 @@ public class PrintContent {
                   }else if("qrcode".equals(type)){
                         tsc.addQRCode(x,y, LabelCommand.EEC.LEVEL_L, 5, LabelCommand.ROTATION.ROTATION_0, content);
                   }else if("image".equals(type)){
+                        int imageWidth = (int)(m.get("width")==null?300:m.get("width"));
                         byte[] bytes = Base64.decode(content, Base64.DEFAULT);
                         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                        tsc.addBitmap(x, y, LabelCommand.BITMAP_MODE.OVERWRITE, 300, bitmap);
+                        tsc.addBitmap(x, y, LabelCommand.BITMAP_MODE.OVERWRITE, imageWidth, bitmap);
                   }
             }
 
