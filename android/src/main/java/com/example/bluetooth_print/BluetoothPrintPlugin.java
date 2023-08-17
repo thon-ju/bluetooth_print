@@ -232,9 +232,6 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
       case "printTest":
         printTest(result);
         break;
-      case "writeByte":
-        writeByte(call, result);
-        break;
       default:
         result.notImplemented();
         break;
@@ -466,57 +463,6 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
         }
         return byteArray;
     }
-
-
-  private void writeByte(MethodCall call, Result result) {
-    Map<String, Object> args = call.arguments();
-
-    final DeviceConnFactoryManager deviceConnFactoryManager = DeviceConnFactoryManager.getDeviceConnFactoryManagers().get(curMacAddress);
-    if (deviceConnFactoryManager == null || !deviceConnFactoryManager.getConnState()) {
-      result.error("not connect", "state not right", null);
-    }
-
-    if (args != null && args.containsKey("data")) {
-      //final byte[] data = args.get("data").toString().getBytes();
-
-      //String data = args.get("data");
-
-      //byte[] rawData = DatatypeConverter.parseBase64Binary(args.get("data"));
-
-      //byte[] rawData = (byte[])args.get("data");
-
-      byte[] rawData = Base64.decode(args.get("data").toString(), Base64.DEFAULT);
-
-      //byte[] rawData = java.util.Base64.getDecoder().decode(args.get("data"));
-
-      
-      if(rawData == null){
-        return;
-      }
-
-      result.error("please add data", "", null);
-
-      threadPool = ThreadPool.getInstantiation();
-      threadPool.addSerialTask(new Runnable() {
-        @Override
-        public void run() {
-          assert deviceConnFactoryManager != null;
-          PrinterCommand printerCommand = deviceConnFactoryManager.getCurrentPrinterCommand();
-
-          if (printerCommand == PrinterCommand.ESC) {
-            deviceConnFactoryManager.sendByteDataImmediately(rawData);
-          }else if (printerCommand == PrinterCommand.TSC) {
-            deviceConnFactoryManager.sendByteDataImmediately(rawData);
-          }else if (printerCommand == PrinterCommand.CPCL) {
-            deviceConnFactoryManager.sendByteDataImmediately(rawData);
-          }
-        }
-      });
-    }else{
-      result.error("please add data", "", null);
-    }
-
-  }
 
   @Override
   public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {

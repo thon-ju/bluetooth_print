@@ -176,8 +176,8 @@ class _MyAppState extends State<MyApp> {
                           child: Text('print label(tsc)'),
                           onPressed:  _connected?() async {
                             Map<String, dynamic> config = Map();
-                            config['width'] = 100; // 标签宽度，单位mm
-                            config['height'] = 150; // 标签高度，单位mm
+                            config['width'] = 40; // 标签宽度，单位mm
+                            config['height'] = 70; // 标签高度，单位mm
                             config['gap'] = 2; // 标签间隔，单位mm
 
                             // x、y坐标位置，单位dpi，1mm=8dpi
@@ -188,14 +188,13 @@ class _MyAppState extends State<MyApp> {
                             list.add(LineText(type: LineText.TYPE_BARCODE, x:10, y:190, content: 'qrcode i\n'));
 
                             List<LineText> list1 = [];
-                            ByteData data = await rootBundle.load("assets/images/test_page.jpg");
+                            ByteData data = await rootBundle.load("assets/images/guide3.png");
                             List<int> imageBytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
                             String base64Image = base64Encode(imageBytes);
                             list1.add(LineText(type: LineText.TYPE_IMAGE, content: base64Image, align: LineText.ALIGN_CENTER, width: 850));
 
+                            await bluetoothPrint.printLabel(config, list);
                             await bluetoothPrint.printLabel(config, list1);
-                            //await bluetoothPrint.writeByte(config, imageBytes);
-                            //print(imageBytes);
                           }:null,
                         ),
                         OutlinedButton(
