@@ -161,7 +161,8 @@
         NSString *content = [m objectForKey:@"content"];
         NSNumber *x = ![m objectForKey:@"x"]?@0 : [m objectForKey:@"x"];
         NSNumber *y = ![m objectForKey:@"y"]?@0 : [m objectForKey:@"y"];
-        
+        NSNumber *imageWidth = ![m objectForKey:@"width"]?@300 : [m objectForKey:@"width"];
+
         if([@"text" isEqualToString:type]){
             [command addTextwithX:[x intValue] withY:[y intValue] withFont:@"TSS24.BF2" withRotation:0 withXscal:1 withYscal:1 withText:content];
         }else if([@"barcode" isEqualToString:type]){
@@ -171,7 +172,7 @@
         }else if([@"image" isEqualToString:type]){
             NSData *decodeData = [[NSData alloc] initWithBase64EncodedString:content options:0];
             UIImage *image = [UIImage imageWithData:decodeData];
-            [command addBitmapwithX:[x intValue] withY:[y intValue] withMode:0 withWidth:300 withImage:image];
+            [command addBitmapwithX:[x intValue] withY:[y intValue] withMode:0 withWidth:imageWidth withImage:image];
         }
        
     }
