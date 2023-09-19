@@ -122,6 +122,7 @@ public class PrintContent {
       public static Vector<Byte> mapToLabel(Map<String,Object> config, List<Map<String,Object>> list) {
             LabelCommand tsc = new LabelCommand();
 
+            int count = (int)(config.get("count")==null?1:config.get("count"));
             int width = (int)(config.get("width")==null?60:config.get("width")); // 单位：mm
             int height = (int)(config.get("height")==null?75:config.get("height")); // 单位：mm
             int gap = (int)(config.get("gap")==null?0:config.get("gap")); // 单位：mm
@@ -170,7 +171,7 @@ public class PrintContent {
             }
 
             // 打印标签
-            tsc.addPrint(1, 1);
+            tsc.addPrint(1, count);
             // 打印标签后 蜂鸣器响
             tsc.addSound(2, 100);
             //开启钱箱

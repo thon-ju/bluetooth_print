@@ -56,8 +56,10 @@ class LineText {
 
   /// ['text'] double
   final int? weight;
-  final int? width;
   final int? height;
+
+  /// ['text','image'] double
+  final int? width;
 
   /// ['text'] absolute position from line begin
   final int? absolutePos;

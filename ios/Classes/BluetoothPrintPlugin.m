@@ -136,7 +136,8 @@
 -(NSData *)mapToTscCommand:(NSDictionary *) args {
     NSDictionary *config = [args objectForKey:@"config"];
     NSMutableArray *list = [args objectForKey:@"data"];
-    
+
+    NSNumber *count = ![config objectForKey:@"count"]?@"1" : [config objectForKey:@"count"];
     NSNumber *width = ![config objectForKey:@"width"]?@"48" : [config objectForKey:@"width"];
     NSNumber *height = ![config objectForKey:@"height"]?@"80" : [config objectForKey:@"height"];
     NSNumber *gap = ![config objectForKey:@"gap"]?@"2" : [config objectForKey:@"gap"];
@@ -177,7 +178,7 @@
        
     }
     
-    [command addPrint:1 :1];
+    [command addPrint:1 :count];
     return [command getCommand];
 }
 
