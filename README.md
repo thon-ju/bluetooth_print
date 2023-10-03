@@ -3,14 +3,14 @@
 
 ## Introduction
 
-BluetoothPrint is a bluetooth plugin for [Flutter](https://flutter.dev), a new mobile SDK to help developers build bluetooth thermal printer apps for both iOS and Android.(for example, Gprinter pt-280、pt-380、gp-1324、gp-2120 eg.)
+BluetoothPrint is a bluetooth plugin for [Flutter](https://flutter.dev), a new mobile SDK to help developers build bluetooth thermal printer apps for both iOS and Android. (for example, Gprinter pt-280、pt-380、gp-1324、gp-2120 eg.)
 
 ### Underway(please suggest)
 [ ] print x,y positions  
 [ ] set paper size  
 [ ] more print examples
 
-### verison
+### version
 4.0.0（flutter 3.x）    
 3.0.0（flutter 2.x）      
 2.0.0（flutter 1.12）       
@@ -44,6 +44,15 @@ BluetoothPrint is a bluetooth plugin for [Flutter](https://flutter.dev), a new m
     flutter:
       sdk: flutter
     bluetooth_print:
+```
+
+- add this code to your [android/app/build.gradle](https://github.com/thon-ju/bluetooth_print/blob/master/example/android/app/build.gradle) file.
+```
+defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 28
+       ... rest of your code
+}
 ```
 
 ### Add permissions for Bluetooth
@@ -155,8 +164,8 @@ A new flutter plugin project.
     Map<String, dynamic> config = Map();
     List<LineText> list = List();
     list.add(LineText(type: LineText.TYPE_TEXT, content: 'A Title', weight: 1, align: LineText.ALIGN_CENTER,linefeed: 1));
-    list.add(LineText(type: LineText.TYPE_TEXT, content: 'this is conent left', weight: 0, align: LineText.ALIGN_LEFT,linefeed: 1));
-    list.add(LineText(type: LineText.TYPE_TEXT, content: 'this is conent right', align: LineText.ALIGN_RIGHT,linefeed: 1));
+    list.add(LineText(type: LineText.TYPE_TEXT, content: 'this is content left', weight: 0, align: LineText.ALIGN_LEFT,linefeed: 1));
+    list.add(LineText(type: LineText.TYPE_TEXT, content: 'this is content right', align: LineText.ALIGN_RIGHT,linefeed: 1));
     list.add(LineText(linefeed: 1));
     list.add(LineText(type: LineText.TYPE_BARCODE, content: 'A12312112', size:10, align: LineText.ALIGN_CENTER, linefeed: 1));
     list.add(LineText(linefeed: 1));
