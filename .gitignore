@@ -6,3 +6,5 @@
 pubspec.lock
 
 build/
+
+.flutter-plugins-dependencies
