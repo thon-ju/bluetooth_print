@@ -186,7 +186,7 @@
     
     EscCommand *command = [[EscCommand alloc]init];
     [command addInitializePrinter];
-    [command addPrintAndFeedLines:3];
+    // [command addPrintAndFeedLines:1];
 
     for(NSDictionary *m in list){
         
@@ -244,7 +244,12 @@
        
     }
     
-    [command addPrintAndFeedLines:4];
+    if([[config objectForKey:@"cut"] isEqualToNumber:@1]){
+      [command addCutPaperAndFeed:1];
+    } else {
+      [command addPrintAndLineFeed];
+    }
+
     return [command getCommand];
 }
 
