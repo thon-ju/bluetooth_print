@@ -172,7 +172,7 @@
             NSLog(@"osama test in image mapToTscCommand");
             NSData *decodeData = [[NSData alloc] initWithBase64EncodedString:content options:0];
             UIImage *image = [UIImage imageWithData:decodeData];
-            [command addBitmapwithX:[x intValue] withY:[y intValue] withMode:0 withWidth:width ,withImage:image];
+            [command addBitmapwithX:[x intValue] withY:[y intValue] withMode:0 withWidth:width withHeight:height withImage:image];
         }
        
     }
@@ -238,7 +238,7 @@
 
             NSData *decodeData = [[NSData alloc] initWithBase64EncodedString:content options:0];
             UIImage *image = [UIImage imageWithData:decodeData];
-            [command addOriginrastBitImage:image width:width, height:height ];
+            [command addOriginrastBitImage:image width:width height:height ];
         }
         
         if([linefeed isEqualToNumber:@1]){
