@@ -169,6 +169,7 @@
         }else if([@"qrcode" isEqualToString:type]){
             [command addQRCode:[x intValue] :[y intValue] :@"L" :5 :@"A" :0 :content];
         }else if([@"image" isEqualToString:type]){
+            NSLog(@"osama test in image mapToTscCommand");
             NSData *decodeData = [[NSData alloc] initWithBase64EncodedString:content options:0];
             UIImage *image = [UIImage imageWithData:decodeData];
             [command addBitmapwithX:[x intValue] withY:[y intValue] withMode:0 withWidth:300 withImage:image];
@@ -233,9 +234,11 @@
            [command addQRCodeSavewithpL:pl withpH:0    withcn:49 withyfn:80 withm:48 withData:[content dataUsingEncoding:NSASCIIStringEncoding]];
            [command addQRCodePrintwithpL:3 withpH:pl+3 withcn:49 withyfn:81 withm:48];
         }else if([@"image" isEqualToString:type]){
+            NSLog(@"osama test in image mapToEscCommand");
+
             NSData *decodeData = [[NSData alloc] initWithBase64EncodedString:content options:0];
             UIImage *image = [UIImage imageWithData:decodeData];
-            [command addOriginrastBitImage:image width:576];
+            [command addOriginrastBitImage:image width:width height:height ];
         }
         
         if([linefeed isEqualToNumber:@1]){
