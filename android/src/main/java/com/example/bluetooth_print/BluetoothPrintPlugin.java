@@ -287,7 +287,9 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
             new Runnable() {
               @Override
               public void run() {
-                channel.invokeMethod(name, ret);
+                if (channel != null) {
+                  channel.invokeMethod(name, ret);
+                }
               }
             });
   }
