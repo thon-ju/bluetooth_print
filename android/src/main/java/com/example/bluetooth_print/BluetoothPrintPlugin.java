@@ -63,8 +63,6 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
   private static final int REQUEST_FINE_LOCATION_PERMISSIONS = 1452;
 
   private static String[] PERMISSIONS_LOCATION = {
-          Manifest.permission.BLUETOOTH,
-          Manifest.permission.BLUETOOTH_ADMIN,
           Manifest.permission.BLUETOOTH_CONNECT,
           Manifest.permission.BLUETOOTH_SCAN,
           Manifest.permission.ACCESS_FINE_LOCATION
@@ -190,9 +188,10 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
           pendingCall = call;
           pendingResult = result;
           break;
+        } else {
+          startScan(call, result);
         }
-
-        startScan(call, result);
+        
         break;
       }
       case "stopScan":
