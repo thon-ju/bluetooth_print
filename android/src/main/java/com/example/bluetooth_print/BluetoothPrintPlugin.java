@@ -63,6 +63,8 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
   private static final int REQUEST_FINE_LOCATION_PERMISSIONS = 1452;
 
   private static String[] PERMISSIONS_LOCATION = {
+          Manifest.permission.BLUETOOTH,
+          Manifest.permission.BLUETOOTH_ADMIN,
           Manifest.permission.BLUETOOTH_CONNECT,
           Manifest.permission.BLUETOOTH_SCAN,
           Manifest.permission.ACCESS_FINE_LOCATION
@@ -445,12 +447,9 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
   public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
 
     if (requestCode == REQUEST_FINE_LOCATION_PERMISSIONS) {
-      if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-        startScan(pendingCall, pendingResult);
-      } else {
-        pendingResult.error("no_permissions", "this plugin requires location permissions for scanning", null);
-        pendingResult = null;
-      }
+      // The grantResults values seem to depend of the Android version, so we cannot
+      // really depend on it, let's simply try to scan now.
+      startScan(pendingCall, pendingResult);
       return true;
     }
     return false;
