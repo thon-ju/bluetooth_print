@@ -330,8 +330,16 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
     Map<String, Object> args = call.arguments();
     if (args !=null && args.containsKey("address")) {
       final String address = (String) args.get("address");
-      this.curMacAddress = address;
 
+      if(address.equals(curMacAddress)) {
+        DeviceConnFactoryManager deviceConnFactoryManager = DeviceConnFactoryManager.getDeviceConnFactoryManagers().get(address);
+        if(deviceConnFactoryManager != null && deviceConnFactoryManager.getConnState()) {
+          result.success(true);
+          return;
+        }
+      }
+
+      this.curMacAddress = address;
       disconnect();
 
       new DeviceConnFactoryManager.Build()
