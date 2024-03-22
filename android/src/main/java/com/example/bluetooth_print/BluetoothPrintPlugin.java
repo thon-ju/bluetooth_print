@@ -190,9 +190,10 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
           pendingCall = call;
           pendingResult = result;
           break;
+        } else {
+          startScan(call, result);
         }
-
-        startScan(call, result);
+        
         break;
       }
       case "stopScan":
@@ -287,7 +288,9 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
             new Runnable() {
               @Override
               public void run() {
-                channel.invokeMethod(name, ret);
+                if (channel != null) {
+                  channel.invokeMethod(name, ret);
+                }
               }
             });
   }
@@ -327,8 +330,16 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
     Map<String, Object> args = call.arguments();
     if (args !=null && args.containsKey("address")) {
       final String address = (String) args.get("address");
-      this.curMacAddress = address;
 
+      if(address.equals(curMacAddress)) {
+        DeviceConnFactoryManager deviceConnFactoryManager = DeviceConnFactoryManager.getDeviceConnFactoryManagers().get(address);
+        if(deviceConnFactoryManager != null && deviceConnFactoryManager.getConnState()) {
+          result.success(true);
+          return;
+        }
+      }
+
+      this.curMacAddress = address;
       disconnect();
 
       new DeviceConnFactoryManager.Build()
@@ -444,12 +455,9 @@ public class BluetoothPrintPlugin implements FlutterPlugin, ActivityAware, Metho
   public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
 
     if (requestCode == REQUEST_FINE_LOCATION_PERMISSIONS) {
-      if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-        startScan(pendingCall, pendingResult);
-      } else {
-        pendingResult.error("no_permissions", "this plugin requires location permissions for scanning", null);
-        pendingResult = null;
-      }
+      // The grantResults values seem to depend of the Android version, so we cannot
+      // really depend on it, let's simply try to scan now.
+      startScan(pendingCall, pendingResult);
       return true;
     }
     return false;
