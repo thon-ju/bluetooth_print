@@ -31,6 +31,10 @@ android {
     lintOptions {
         disable 'InvalidPackage'
     }
+
+    if (project.android.hasProperty('namespace')) {
+        namespace 'org.aissystem.bt.btprint'
+    }
 }
 
 dependencies {
