@@ -2,39 +2,52 @@ group 'com.example.bluetooth_print'
 version '1.0'
 
 buildscript {
+    ext.kotlin_version = '1.9.25'
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.2'
+        classpath 'com.android.tools.build:gradle:8.3.2'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 rootProject.allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 31
+    namespace 'com.example.bluetooth_print'
+    compileSdk 35
 
     defaultConfig {
-        minSdkVersion 21
+        minSdk 24
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-    lintOptions {
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = '11'
+    }
+
+    lint {
         disable 'InvalidPackage'
     }
 }
 
 dependencies {
     implementation files('libs/gprintersdkv2.jar')
-    implementation "androidx.core:core:1.6.0"
-//    implementation files("D:\\devtools\\flutter\\bin\\cache\\artifacts\\engine\\android-x64\\flutter.jar")
+    implementation "androidx.core:core:1.13.1"
 }

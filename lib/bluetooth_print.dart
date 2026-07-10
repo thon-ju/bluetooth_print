@@ -10,6 +10,11 @@ class BluetoothPrint {
   static const int CONNECTED = 1;
   static const int DISCONNECTED = 0;
 
+  /// Emitted on the [state] stream when a connect attempt fails at the native
+  /// layer (port could not be opened). Lets callers fail fast instead of
+  /// waiting for a CONNECTED event that will never arrive.
+  static const int CONNECT_FAILED = -2;
+
   static const MethodChannel _channel =
       const MethodChannel('$NAMESPACE/methods');
   static const EventChannel _stateChannel =

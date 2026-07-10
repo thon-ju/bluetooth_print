@@ -103,6 +103,9 @@ public class DeviceConnFactoryManager {
     public static final String DEVICE_ID = "id";
     public static final int CONN_STATE_DISCONNECT = 0x90;
     public static final int CONN_STATE_CONNECTED = CONN_STATE_DISCONNECT << 3;
+    // Broadcast when openPort() fails so the Flutter side can show a real
+    // error instead of waiting for a CONNECTED event that will never come.
+    public static final int CONN_STATE_FAILED = 0x91;
     public PrinterReader reader;
     private int queryPrinterCommandFlag;
     private final int ESC = 1;
@@ -154,10 +157,16 @@ public class DeviceConnFactoryManager {
         if (isOpenPort) {
             queryCommand();
         } else {
+            // A failed connect used to abandon the BluetoothSocket without
+            // closing it: every retry leaked a socket/fd in this long-lived
+            // process until connects failed system-wide and only a force-stop
+            // (users: "clear cache") recovered. Close before dropping the ref,
+            // and tell the app the attempt failed so it can stop waiting.
             if (this.mPort != null) {
-                this.mPort=null;
+                this.mPort.closePort();
+                this.mPort = null;
             }
-
+            sendStateBroadcast(CONN_STATE_FAILED);
         }
     }
 
@@ -203,12 +212,14 @@ public class DeviceConnFactoryManager {
                 reader.cancel();
                 reader = null;
             }
-            boolean b= this.mPort.closePort();
-            if(b) {
-                this.mPort=null;
-                isOpenPort = false;
-                currentPrinterCommand = null;
-            }
+            this.mPort.closePort();
+            // Always release the port reference and reset state, even when
+            // closePort() reports a failure. A half-closed socket otherwise
+            // keeps the RFCOMM channel busy, so the next connect() fails and the
+            // user can't reconnect until the app is reinstalled.
+            this.mPort = null;
+            isOpenPort = false;
+            currentPrinterCommand = null;
 
             Log.e(TAG, "******************* close Port macAddress -> " + macAddress);
         }
@@ -223,6 +234,10 @@ public class DeviceConnFactoryManager {
                 deviceConnFactoryManagers.put(deviceConnFactoryManager.macAddress, null);
             }
         }
+        // Drop the now-stale (null) entries so the next connect() builds a fresh
+        // manager instead of reusing a dead one carried over from a previous
+        // session.
+        deviceConnFactoryManagers.clear();
     }
 
     private DeviceConnFactoryManager(Build build) {
@@ -514,7 +529,10 @@ public class DeviceConnFactoryManager {
         intent.putExtra(STATE, state);
         intent.putExtra(DEVICE_ID, macAddress);
         if(mContext != null){
-            mContext.sendBroadcast(intent);//此处若报空指针错误，需要在清单文件application标签里注册此类，参考demo
+            // Same-app broadcast: keeps delivery working with the
+            // RECEIVER_NOT_EXPORTED registration required on Android 14+.
+            intent.setPackage(mContext.getPackageName());
+            mContext.sendBroadcast(intent);
         }
     }
 

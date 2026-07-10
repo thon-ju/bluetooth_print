@@ -17,6 +17,116 @@ import java.util.Vector;
  */
 public class PrintContent {
       private static final String TAG = PrintContent.class.getSimpleName();
+      private static final int DOTS_PER_MM = 8;
+      private static final int ESC_MAX_WIDTH_DOTS = 576;
+      private static final int LABEL_DEFAULT_WIDTH_DOTS = 300;
+
+      private PrintContent() {
+      }
+
+      private static int toInt(Object value, int defaultValue) {
+            if (value == null) {
+                  return defaultValue;
+            }
+            if (value instanceof Number) {
+                  return ((Number) value).intValue();
+            }
+            if (value instanceof String) {
+                  try {
+                        return Integer.parseInt(((String) value).trim());
+                  } catch (NumberFormatException ignore) {
+                  }
+            }
+            return defaultValue;
+      }
+
+      private static int readDots(Map<String, Object> source, String key) {
+            if (source == null || key == null) {
+                  return -1;
+            }
+            int raw = toInt(source.get(key), -1);
+            if (raw <= 0) {
+                  return -1;
+            }
+            if (raw <= 120) {
+                  return raw * DOTS_PER_MM;
+            }
+            return raw;
+      }
+
+      private static int resolveImageWidthDots(Map<String, Object> config,
+                                               Map<String, Object> item,
+                                               int fallbackDots) {
+            int candidate = readDots(item, "imageWidthDots");
+            if (candidate <= 0) {
+                  candidate = readDots(item, "imageMaxWidth");
+            }
+            if (candidate <= 0) {
+                  candidate = readDots(item, "imageWidth");
+            }
+            if (candidate <= 0) {
+                  candidate = readDots(config, "imageWidthDots");
+            }
+            if (candidate <= 0) {
+                  candidate = readDots(config, "imageMaxWidth");
+            }
+            if (candidate <= 0) {
+                  candidate = readDots(config, "imageWidth");
+            }
+            if (candidate <= 0 && config != null) {
+                  int configWidthMm = toInt(config.get("width"), -1);
+                  if (configWidthMm > 0) {
+                        candidate = configWidthMm * DOTS_PER_MM;
+                  }
+            }
+            if (candidate <= 0) {
+                  candidate = fallbackDots;
+            }
+            return candidate;
+      }
+
+      private static int normalizeWidth(int widthDots) {
+            if (widthDots <= 0) {
+                  return 0;
+            }
+            int normalized = widthDots - (widthDots % 8);
+            if (normalized <= 0) {
+                  normalized = 8;
+            }
+            return normalized;
+      }
+
+      private static EscCommand.JUSTIFICATION resolveJustification(int align) {
+            switch (align) {
+                  case 1:
+                        return EscCommand.JUSTIFICATION.CENTER;
+                  case 2:
+                        return EscCommand.JUSTIFICATION.RIGHT;
+                  default:
+                        return EscCommand.JUSTIFICATION.LEFT;
+            }
+      }
+
+      private static Bitmap scaleBitmapToWidth(Bitmap bitmap,
+                                               int requestedWidthDots,
+                                               int absoluteMaxDots) {
+            if (bitmap == null) {
+                  return null;
+            }
+            int safeMax = absoluteMaxDots > 0 ? absoluteMaxDots : bitmap.getWidth();
+            int target = requestedWidthDots > 0 ? requestedWidthDots : bitmap.getWidth();
+            target = Math.min(target, safeMax);
+            target = Math.min(target, bitmap.getWidth());
+            target = normalizeWidth(target);
+            if (target <= 0) {
+                  target = normalizeWidth(Math.min(bitmap.getWidth(), safeMax));
+            }
+            if (target <= 0 || bitmap.getWidth() == target) {
+                  return bitmap;
+            }
+            int targetHeight = Math.max(1, Math.round(bitmap.getHeight() * (target / (float) bitmap.getWidth())));
+            return Bitmap.createScaledBitmap(bitmap, target, targetHeight, true);
+      }
 
       /**
        * 票据打印对象转换
@@ -32,34 +142,42 @@ public class PrintContent {
             for (Map<String,Object> m: list) {
                   String type = (String)m.get("type");
                   String content = (String)m.get("content");
-                  int align = (int)(m.get("align")==null?0:m.get("align"));
-                  int size = (int)(m.get("size")==null?3:m.get("size"));
-                  int weight = (int)(m.get("weight")==null?0:m.get("weight"));
-                  int width = (int)(m.get("width")==null?0:m.get("width"));
-                  int height = (int)(m.get("height")==null?0:m.get("height"));
-                  int underline = (int)(m.get("underline")==null?0:m.get("underline"));
-                  int linefeed = (int)(m.get("linefeed")==null?0:m.get("linefeed"));
+                  int align = toInt(m.get("align"), 0);
+                  int size = toInt(m.get("size"), 3);
+                  int weight = toInt(m.get("weight"), 0);
+                  int width = toInt(m.get("width"), 0);
+                  int height = toInt(m.get("height"), 0);
+                  int underline = toInt(m.get("underline"), 0);
+                  int linefeed = toInt(m.get("linefeed"), 0);
 
-                  EscCommand.ENABLE emphasized = weight==0?EscCommand.ENABLE.OFF:EscCommand.ENABLE.ON;
-                  EscCommand.ENABLE doublewidth = width==0?EscCommand.ENABLE.OFF:EscCommand.ENABLE.ON;
-                  EscCommand.ENABLE doubleheight = height==0?EscCommand.ENABLE.OFF:EscCommand.ENABLE.ON;
-                  EscCommand.ENABLE isUnderline = underline==0?EscCommand.ENABLE.OFF:EscCommand.ENABLE.ON;
+                  EscCommand.ENABLE emphasized =
+                          weight == 0 ? EscCommand.ENABLE.OFF : EscCommand.ENABLE.ON;
+                  EscCommand.ENABLE doublewidth =
+                          width == 0 ? EscCommand.ENABLE.OFF : EscCommand.ENABLE.ON;
+                  EscCommand.ENABLE doubleheight =
+                          height == 0 ? EscCommand.ENABLE.OFF : EscCommand.ENABLE.ON;
+                  EscCommand.ENABLE isUnderline =
+                          underline == 0 ? EscCommand.ENABLE.OFF : EscCommand.ENABLE.ON;
 
                   // 设置打印位置
-                  esc.addSelectJustification(align==0?EscCommand.JUSTIFICATION.LEFT:(align==1?EscCommand.JUSTIFICATION.CENTER:EscCommand.JUSTIFICATION.RIGHT));
+                  esc.addSelectJustification(resolveJustification(align));
 
                   if("text".equals(type)){
-                        int absolutePos = (int)(m.get("absolutePos")==null?0:m.get("absolutePos"));
-                        int relativePos = (int)(m.get("relativePos")==null?0:m.get("relativePos"));
-                        int fontZoom = (int)(m.get("fontZoom")==null?1:m.get("fontZoom"));
+                        int absolutePos = toInt(m.get("absolutePos"), 0);
+                        int relativePos = toInt(m.get("relativePos"), 0);
+                        int fontZoom = toInt(m.get("fontZoom"), 1);
                         short aPos = (short)absolutePos;
                         short rPos = (short)relativePos;
                         Log.e(TAG,"******************* absolutePos: " + aPos +", relativePos: " + rPos +", fontZoom: " + fontZoom);
 
                         // 设置绝对打印位置，将当前打印位置设置到距离行首 n* hor_motion_unit 点
-                        esc.addSetAbsolutePrintPosition(aPos);
+                        if (absolutePos > 0) {
+                              esc.addSetAbsolutePrintPosition(aPos);
+                        }
                         // 设置相对打印位置，将打印位置设置到距当前位置 n 点处
-                        esc.addSetRelativePrintPositon(rPos);
+                        if (relativePos > 0) {
+                              esc.addSetRelativePrintPositon(rPos);
+                        }
                         // 设置为倍高倍宽
                         esc.addSelectPrintModes(EscCommand.FONT.FONTA, emphasized, doubleheight, doublewidth, isUnderline);
                         if(fontZoom>1){
@@ -91,7 +209,16 @@ public class PrintContent {
                   }else if("image".equals(type)){
                         byte[] bytes = Base64.decode(content, Base64.DEFAULT);
                         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                        esc.addRastBitImage(bitmap, 576, 0);
+                        if (bitmap != null) {
+                              int targetWidthDots = resolveImageWidthDots(config, m, ESC_MAX_WIDTH_DOTS);
+                              Bitmap printableBitmap = scaleBitmapToWidth(bitmap, targetWidthDots, ESC_MAX_WIDTH_DOTS);
+                              esc.addRastBitImage(printableBitmap, printableBitmap.getWidth(), 0);
+                              if (printableBitmap != bitmap) {
+                                    bitmap.recycle();
+                              }
+                        } else {
+                              Log.w(TAG, "Unable to decode image content for receipt printing");
+                        }
                   }
 
                   if(linefeed == 1){
@@ -164,7 +291,27 @@ public class PrintContent {
                   }else if("image".equals(type)){
                         byte[] bytes = Base64.decode(content, Base64.DEFAULT);
                         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                        tsc.addBitmap(x, y, LabelCommand.BITMAP_MODE.OVERWRITE, 300, bitmap);
+                        if (bitmap != null) {
+                      int labelWidthMm = toInt(config == null ? null : config.get("width"), 60);
+                      int labelMaxDots = labelWidthMm > 0 ? labelWidthMm * DOTS_PER_MM : LABEL_DEFAULT_WIDTH_DOTS;
+                      int absoluteMaxDots = labelMaxDots > 0 ? labelMaxDots : LABEL_DEFAULT_WIDTH_DOTS;
+                      int fallbackDots = LABEL_DEFAULT_WIDTH_DOTS;
+                      if (absoluteMaxDots > 0) {
+                            fallbackDots = Math.min(fallbackDots, absoluteMaxDots);
+                      }
+                      if (fallbackDots <= 0) {
+                            fallbackDots = LABEL_DEFAULT_WIDTH_DOTS;
+                      }
+                      int targetWidthDots = resolveImageWidthDots(config, m, fallbackDots);
+                              Bitmap printableBitmap = scaleBitmapToWidth(bitmap, targetWidthDots, absoluteMaxDots);
+                              tsc.addBitmap(x, y, LabelCommand.BITMAP_MODE.OVERWRITE,
+                                      normalizeWidth(printableBitmap.getWidth()), printableBitmap);
+                              if (printableBitmap != bitmap) {
+                                    bitmap.recycle();
+                              }
+                        } else {
+                              Log.w(TAG, "Unable to decode image content for label printing");
+                        }
                   }
             }
 
